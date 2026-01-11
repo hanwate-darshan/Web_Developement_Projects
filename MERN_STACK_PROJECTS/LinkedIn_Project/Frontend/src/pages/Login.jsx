@@ -3,6 +3,7 @@ import logo from "../assets/logo.svg";
 import { useNavigate } from "react-router-dom";
 import { authDataContext } from "../context/AuthContext.jsx";
 import axios from "axios";
+import { userDataContext } from "../context/UserContext.jsx";
 
 
 const Login = () => {
@@ -13,6 +14,8 @@ const Login = () => {
     const [loading, setLoading] = useState(false)
     const [err, setErr] = useState("")
     
+    let {userData,setuserData} = useContext(userDataContext)
+
        
     let navigate = useNavigate()
     let {serverUrl} = useContext(authDataContext)
@@ -32,6 +35,8 @@ const Login = () => {
             setEmailName("")
             setPassword("")
             
+            setuserData(result.data)
+            navigate("/")
 
         } catch (error) {
             // console.log(error)

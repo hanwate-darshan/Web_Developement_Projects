@@ -4,6 +4,7 @@ import logo from "../assets/logo.svg";
 import { useNavigate } from "react-router-dom";
 import { authDataContext } from "../context/AuthContext.jsx";
 import axios from "axios";
+import { userDataContext } from "../context/UserContext.jsx";
 
 const Signup = () => {
     
@@ -21,8 +22,7 @@ const Signup = () => {
     let navigate = useNavigate()
     
     let {serverUrl} = useContext(authDataContext)
-
-
+    let {userData , setuserData} = useContext(userDataContext)
 
 
 
@@ -45,6 +45,9 @@ const Signup = () => {
             setEmailName("")
             setPassword("")
             setUserName("")
+
+           setuserData(result.data)
+           navigate("/")
 
         } catch (error) {
             // console.log(error)

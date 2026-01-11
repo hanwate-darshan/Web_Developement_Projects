@@ -1,8 +1,11 @@
 import React from 'react'
+import Navbar from '../components/Navbar'
 
 const Home = () => {
   return (
-    <div>Home</div>
+    <div className='w-full min-h-screen bg-[#e8eee8]'>
+      <Navbar />
+    </div>
   )
 }
 

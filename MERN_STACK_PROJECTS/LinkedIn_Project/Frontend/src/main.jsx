@@ -11,7 +11,6 @@ createRoot(document.getElementById('root')).render(
     <BrowserRouter>
     <AuthContext>
      <UserContext>
-
     <App />
      </UserContext>
     </AuthContext>
