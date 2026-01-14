@@ -1,1 +1,0 @@
-# this is a MERN stack chat application
