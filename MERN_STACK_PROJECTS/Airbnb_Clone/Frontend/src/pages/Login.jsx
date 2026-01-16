@@ -4,6 +4,7 @@ import { RiEyeOffFill } from "react-icons/ri";
 import { useNavigate } from "react-router-dom";
 import { AuthDataContext } from "../context/AuthContext.jsx";
 import axios from "axios";
+import { userDataContext } from "../context/UserContext.jsx";
 
 const Login = () => {
     const [show, setShow] = useState(false)
@@ -11,6 +12,8 @@ const Login = () => {
     let {serverUrl} = useContext(AuthDataContext)
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
+
+    let {userData ,setUserData} = useContext(userDataContext)
 
     const handleLogin =  async (e) => {
     try {
@@ -24,6 +27,8 @@ const Login = () => {
         },
         { withCredentials: true }
       );
+      setUserData(result.data)
+      navigate("/")
       console.log(result);
     } catch (error) {
       console.log(`handle Login error ${error}`);

@@ -399,3 +399,410 @@ export default isAuth;
 ```
 
 
+- controller 
+
+ - user.controller.js
+
+ ```
+ import User from "../models/user.model.js"
+
+export const getCurrentUser = async (req,res) => {
+    try {
+        let user = await User.findById(req.userId).select(-password)
+        if(!user){
+            res.status(400).json({message:"your does not found"})
+        }
+        res.status(200).json(user)
+    } catch (error) {
+        res.status(400).json({message:`getCurrentUser Error ${error}`})
+        
+    }
+}
+ ```
+
+ - routes
+
+   - user.routes.js
+
+
+```
+
+import express from "express"
+import isAuth from "../middleware/isAuth.jsx";
+import { getCurrentUser } from "../controllers/user.controller.jsx";
+
+let userRoute = express.Router();
+userRoute.get("/currentuser",isAuth,getCurrentUser)
+
+
+
+export default userRoute;
+```
+
+
+
+
+
+
+
+
+
+
+
+## currently i'm not writing middle files directly moves towards image and listing models
+
+
+## - create a listing model
+
+- models - listing.model.js
+
+```
+import mongoose from "mongoose";
+import User from "./user.model.js";
+
+const listingSchema = new mongoose.Schema({
+    title:{
+        type:String,
+        required:true
+    },
+    description:{
+        type:String,
+        required:true
+    },
+    host:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"User",
+        required:true
+    },
+    image1:{
+        type:String,
+        required:true
+    },
+    image2:{
+        type:String,
+        required:true
+    },
+    image3:{
+        type:String,
+        required:true
+    },
+    rent:{
+        type:Number,
+        required:true
+    },
+    city:{
+        type:String,
+        required:true
+    },
+    landMark:{
+        type:String,
+        required:true
+    },
+    category:{
+        type:String,
+        required:true
+    },
+    isBooked:{
+        type:Boolean,
+        default:false
+    }
+
+},{timestamps:true})
+
+const Listing = mongoose.model("Listing",listingSchema)
+export default Listing;
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## image handling using multer and cloudnary
+
+
+- npm i multer
+
+
+## - middleware - multer.js
+
+```
+import multer from "multer";
+
+let storage = multer.diskStorage({
+    destination:(req,file,cb)=>{
+        cb(null,"./public ")
+    },
+    filename:(req,file,cb)=>{
+        cb(null,file.originalname)
+    }
+})
+
+const upload = multer({storage})
+
+export default upload;
+
+```
+
+### now setup cloudnary 
+
+visit website copy all the variables in .env files 
+
+and access it
+- .env
+
+```
+PORT = 3000
+
+MONGODB_URL = "mongodb+srv://snapchat12snapgg_db_user:snapchat12@cluster0.8eztmfk.mongodb.net/AirbnbClone"
+
+JWT_SECRET = "13DHDJFDNFDKF78437383DJ"
+
+NODE_DEVELOPMENT = "development"
+
+
+CLOUDNARY_CLOUD_NAME = "dmwtpylk4"
+CLOUDNARY_API_KEY = "726776492719937"
+CLOUDNARY_API_SECRET = "enoZJiEUK6uN8nBgoLiG7kz_qw4"
+
+```
+
+- config  --->> cloudnary.js
+
+
+```
+import { v2 as cloudinary } from "cloudinary";
+import fs from "fs";
+
+const uploadOnCloudinary = async (filePath) => {
+  cloudinary.config({
+    cloud_name: process.env.CLOUDNARY_CLOUD_NAME,
+    api_key: process.env.CLOUDNARY_API_KEY,
+    api_secret: process.env.CLOUDNARY_API_SECRET
+  });
+  try {
+    if (!filePath) {
+      return null;
+    }
+    const uploadResult = await cloudinary.uploader.upload(filePath);
+    fs.unlinkSync(filePath)
+    return uploadResult.secure_url
+} catch (error) {
+      fs.unlinkSync(filePath)
+      console.log(error)
+  }
+};
+
+```
+
+
+
+
+## - now create listing controller
+
+- controller --> listing.controller.js
+
+
+```
+import uploadOnCloudinary from "../config/cloudnary.js";
+import Listing from "../models/listing.model.js";
+import User from "../models/user.model.js";
+
+export const addListing = async (req,res) => {
+    try {
+        let host = req.userId;
+        let {title ,description , rent ,city , landMark , category} = req.body
+        let image1 = await uploadOnCloudinary(res.files.image1[0].path)
+        let image2 = await uploadOnCloudinary(res.files.image2[0].path)
+        let image3 = await uploadOnCloudinary(res.files.image3[0].path)
+
+
+        let listing = await Listing.create({
+            title ,description , rent ,city , landMark , category, image1,image2,image3,host
+        })
+
+        let user = await User.findByIdAndUpdate(host,{$push:{listing:listing._id}},{new:true})
+        if(!user){
+            res.status(404).json({message:"user is not found"})
+        }
+
+        res.status(201).json(listing)
+
+        
+
+
+    } catch (error) {
+        res.status(500).json({message:`add listing error ${error}`})
+    }
+}
+
+
+
+
+```
+
+- routes ----> listing.routes.js
+
+
+```
+import express from "express"
+import isAuth from "../middleware/isAuth.js"
+import upload from "../middleware/multer.js"
+import { addListing } from "../controllers/listing.controller.js"
+
+let listingRouter = express.Router()
+
+
+listingRouter.post("/add",isAuth,upload.fields([
+    {name:image1,maxCount:1},
+    {name:image2,maxCount:1},
+    {name:image3,maxCount:1}
+]),addListing)
+
+```
+
+- index.js --->
+
+```
+import express from "express";
+import dotenv from "dotenv";
+import connectDB from "./config/db.js";
+import authRouter from "./routes/auth.routes.js";
+import cookieParser from "cookie-parser";
+import cors from "cors";
+import userRoute from "./routes/user.routes.js";
+import listingRouter from "./routes/listing.routes.js";
+
+dotenv.config();
+
+const app = express();
+const port = process.env.PORT || 6000;
+
+/* ---------- Middlewares ---------- */
+
+// Enable CORS
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
+
+// Parse JSON & form data
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Parse cookies
+app.use(cookieParser());
+
+/* ---------- Routes ---------- */
+app.use("/api/auth", authRouter);
+app.use("/api/user", userRoute);
+app.use("/api/listing", listingRouter);
+
+/* ---------- Server ---------- */
+app.listen(port, async () => {
+  await connectDB();
+  console.log(`Server running on port ${port}`);
+});
+
+
+```
+
+
+
+## - ListingContext.jsx
+
+```
+import axios from 'axios'
+import React, { useContext } from 'react'
+import { useState } from 'react'
+import { createContext } from 'react'
+
+import { AuthDataContext } from './AuthContext'
+export const listingDataContext = createContext()
+
+const ListingContext = ({children}) => {
+
+    const [title, setTitle] = useState("")
+    const [description, setDescription] = useState("")
+    const [frontEndImage1, setfrontEndImage1] = useState(null)
+    const [frontEndImage2, setFrontEndImage2] = useState(null)
+    const [frontEndImage3, setFrontEndImage3] = useState(null)
+    const [backEndImage1, setBackEndImage1] = useState(null)
+    const [backEndImage2, setBackEndImage2] = useState(null)
+    const [backEndImage3, setBackEndImage3] = useState(null)
+    const [rent, setRent] = useState("")
+    const [city, setCity] = useState("")
+    const [landmark, setLandmark] = useState("")
+    const [category, setCategory] = useState("")
+
+      
+
+    let {serverUrl} = useContext(AuthDataContext)
+
+    
+    
+    const handleAddListing = async () => {
+        try {
+        let formData = new FormData()
+        formData.append("title",title)
+        formData.append("image1",backEndImage1)
+        formData.append("image2",backEndImage2)
+        formData.append("image3",backEndImage3)
+        formData.append("description",description)
+        formData.append("rent",rent)
+        formData.append("city",city)
+        formData.append("landmark",landmark)
+        formData.append("category",category)
+        
+  
+        let result = await axios.post(serverUrl + "/api/listing/add",formData,{withCredentials:true})
+        console.log(result)
+
+     
+
+    } catch (error) {
+        console.log(error)
+    }
+  }
+
+    let value = {
+          title, setTitle,
+     description, setDescription,
+frontEndImage1, setfrontEndImage1,
+frontEndImage2, setFrontEndImage2,
+frontEndImage3, setFrontEndImage3,
+backEndImage1, setBackEndImage1,
+backEndImage2, setBackEndImage2,
+backEndImage3, setBackEndImage3,
+rent, setRent,
+city, setCity,
+landmark, setLandmark,
+category, setCategory
+    }
+  return (
+    <div>
+      <listingDataContext.Provider value={value}>
+
+        {children}
+
+      </listingDataContext.Provider>
+    </div>
+  )
+}
+
+export default ListingContext
+
+
+
+```

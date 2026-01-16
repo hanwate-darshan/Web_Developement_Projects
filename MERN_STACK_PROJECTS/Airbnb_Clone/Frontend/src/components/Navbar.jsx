@@ -13,16 +13,19 @@ import { BsShop } from "react-icons/bs";
 import { useNavigate } from "react-router-dom";
 import { AuthDataContext } from "../context/AuthContext.jsx";
 import axios from "axios"
+import { userDataContext } from "../context/UserContext.jsx";
 
 const Navbar = () => {
   const [visible, setVisible] = useState(false);
   const navigate = useNavigate();
   let {serverUrl} = useContext(AuthDataContext)
+  let {userData,setUserData} = useContext(userDataContext)
 
   const handleLogOut = async (params) => {
     try {
         let result = await axios.post(serverUrl + "/api/auth/logout", {withCredentials:true})
         console.log(result)
+        setUserData(null)
     } catch (error) {
         console.log(error)
     }
@@ -97,8 +100,9 @@ const Navbar = () => {
             onClick={() => setVisible((prev) => !prev)}
             className="flex items-center gap-2 border rounded-full px-3 py-2 hover:shadow-md cursor-pointer"
           >
-            <GiHamburgerMenu />
-            <CgProfile />
+            <GiHamburgerMenu className=" h-5 w-5 " />
+            {userData == null && <CgProfile className=" h-5 w-5 " />}
+            {userData != null && <span className="h-6 w-6 px-1 py-1 bg-black text-white rounded-full flex items-center justify-center">{userData?.name.slice(0,1)}</span>}
           </button>
         </div>
       </div>

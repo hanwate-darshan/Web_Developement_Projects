@@ -5,6 +5,7 @@ import authRouter from "./routes/auth.routes.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import userRoute from "./routes/user.routes.js";
+import listingRouter from "./routes/listing.routes.js";
 
 dotenv.config();
 
@@ -31,6 +32,7 @@ app.use(cookieParser());
 /* ---------- Routes ---------- */
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRoute);
+app.use("/api/listing", listingRouter);
 
 /* ---------- Server ---------- */
 app.listen(port, async () => {
