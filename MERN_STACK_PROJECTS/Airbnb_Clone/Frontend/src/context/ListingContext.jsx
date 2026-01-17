@@ -3,11 +3,14 @@ import React, { useContext } from 'react'
 import { useState } from 'react'
 import { createContext } from 'react'
 
-import { AuthDataContext } from './AuthContext'
+import { AuthDataContext } from './AuthContext.jsx'
+import { useNavigate } from 'react-router-dom'
 export const listingDataContext = createContext()
 
 const ListingContext = ({children}) => {
 
+
+    let navigate = useNavigate()
     const [title, setTitle] = useState("")
     const [description, setDescription] = useState("")
     const [frontEndImage1, setfrontEndImage1] = useState(null)
@@ -44,7 +47,19 @@ const ListingContext = ({children}) => {
         let result = await axios.post(serverUrl + "/api/listing/add",formData,{withCredentials:true})
         console.log(result)
 
-     
+        navigate("/")
+        setTitle("")
+        setDescription("")
+        setfrontEndImage1(null)
+        setFrontEndImage2(null)
+        setFrontEndImage3(null)
+        setBackEndImage1(null)
+        setBackEndImage2(null)
+        setBackEndImage3(null)
+        setRent("")
+        setCity("")
+        setLandmark("")
+        setCategory("")
 
     } catch (error) {
         console.log(error)
@@ -63,7 +78,9 @@ backEndImage3, setBackEndImage3,
 rent, setRent,
 city, setCity,
 landmark, setLandmark,
-category, setCategory
+category, setCategory,
+
+handleAddListing
     }
   return (
     <div>

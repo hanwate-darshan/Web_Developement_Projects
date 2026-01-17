@@ -37,28 +37,45 @@ const Navbar = () => {
       {/* ================= DROPDOWN ================= */}
       {visible && (
         <div className="absolute top-16 right-4 w-48 bg-white border rounded-xl shadow-lg flex flex-col text-sm">
-          <button
-            onClick={() => navigate("/login")}
+         {!userData &&  <button
+          onClick={() => {
+  navigate("/login");
+  setVisible(false);
+}}
             className="px-4 py-2 text-left hover:bg-gray-100 cursor-pointer overflow-hidden"
+           
+            
           >
             Login
-          </button>
-          <button
+          </button>}
+
+
+          {userData && <button
             className="px-4 py-2 text-left border-b hover:bg-gray-100 cursor-pointer"
             onClick={handleLogOut}
           >
             Logout
-          </button>
+          </button>}
+
+
           <button
-            onClick={() => navigate("/listing")}
+            onClick={() => navigate("/listingpage1")}
             className="px-4 py-2 text-left  hover:bg-gray-100 cursor-pointer"
           >
             List your home
           </button>
-          <button className="px-4 py-2 text-left hover:bg-gray-100 cursor-pointer">
+          <button className="px-4 py-2 text-left hover:bg-gray-100 cursor-pointer"
+          onClick={() => {
+ 
+  setVisible(false);
+}}>
             My Listing
           </button>
-          <button className="px-4 py-2 text-left hover:bg-gray-100 cursor-pointer">
+          <button className="px-4 py-2 text-left hover:bg-gray-100 cursor-pointer"
+           onClick={() => {
+ 
+  setVisible(false);
+}}>
             Check Booking
           </button>
         </div>
@@ -90,7 +107,7 @@ const Navbar = () => {
         {/* Right Buttons */}
         <div className="flex items-center gap-3">
           <button
-            onClick={() => navigate("/listing")}
+            onClick={() => navigate("/listingpage1")}
             className="hidden md:block text-sm font-medium hover:bg-gray-100 px-3 py-2 rounded-full cursor-pointer"
           >
             List your home
