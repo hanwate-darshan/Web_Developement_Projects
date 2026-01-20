@@ -5,6 +5,7 @@ import { createContext } from 'react'
 
 import { AuthDataContext } from './AuthContext.jsx'
 import { useNavigate } from 'react-router-dom'
+import { useEffect } from 'react'
 export const listingDataContext = createContext()
 
 const ListingContext = ({children}) => {
@@ -23,6 +24,7 @@ const ListingContext = ({children}) => {
     const [city, setCity] = useState("")
     const [landmark, setLandmark] = useState("")
     const [category, setCategory] = useState("")
+    const [listingData, setListingData] = useState([])
 
       
 
@@ -66,6 +68,22 @@ const ListingContext = ({children}) => {
     }
   }
 
+
+  const getListing = async () => {
+    try {
+      let result = await axios.get(serverUrl + "/api/listing/get",{withCredentials:true})
+      setListingData(result.data)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+
+  useEffect(()=>{
+       getListing()
+  },[])
+
+
     let value = {
           title, setTitle,
      description, setDescription,
@@ -79,6 +97,7 @@ rent, setRent,
 city, setCity,
 landmark, setLandmark,
 category, setCategory,
+listingData,setListingData,
 
 handleAddListing
     }

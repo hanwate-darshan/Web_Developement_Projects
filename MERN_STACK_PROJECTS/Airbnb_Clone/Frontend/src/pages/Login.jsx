@@ -14,8 +14,10 @@ const Login = () => {
     const [password, setPassword] = useState("")
 
     let {userData ,setUserData} = useContext(userDataContext)
+    let {loading,setLoading} = useContext(AuthDataContext)
 
     const handleLogin =  async (e) => {
+      setLoading(true)
     try {
       e.preventDefault();
       let result =  await axios.post(
@@ -27,6 +29,7 @@ const Login = () => {
         },
         { withCredentials: true }
       );
+      setLoading(false)
       setUserData(result.data)
       navigate("/")
       console.log(result);
@@ -91,8 +94,8 @@ const Login = () => {
            <button
              type="submit"
              className="w-full mt-2 bg-[#FF385C] hover:bg-[#e31c5f] text-white font-semibold py-2.5 rounded-lg transition cursor-pointer"
-           >
-             Login
+           disabled={loading}> 
+             {loading ?"loading...": "Login"}
            </button>
     <p className="text-center cursor-pointer" onClick={()=>navigate('/signup')}>Create New Account : <span className="text-red-500 font-semibold" >Sign Up</span> </p>
            {/* Footer text */}

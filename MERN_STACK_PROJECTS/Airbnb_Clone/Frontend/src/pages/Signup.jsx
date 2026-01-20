@@ -14,8 +14,10 @@ const Signup = () => {
   let navigate = useNavigate();
   let { serverUrl } = useContext(AuthDataContext); 
   let {userData,setUserData} = useContext(userDataContext)
+  let {loading,setLoading} = useContext(AuthDataContext)
 
   const handleSignUp =  async (e) => {
+    setLoading(true)
     try {
       e.preventDefault();
       let result =  await axios.post(
@@ -27,6 +29,7 @@ const Signup = () => {
         },
         { withCredentials: true }
       );
+      setLoading(false)
       setUserData(result.data)
       console.log(result);
     } catch (error) {
@@ -113,8 +116,9 @@ const Signup = () => {
         <button
           type="submit"
           className="w-full mt-2 bg-[#FF385C] hover:bg-[#e31c5f] text-white font-semibold py-2.5 rounded-lg transition cursor-pointer"
-        >
-          Continue
+        disabled={loading}>
+          
+          {loading ? "Loading...":"Continue"}
         </button>
 
         <p
