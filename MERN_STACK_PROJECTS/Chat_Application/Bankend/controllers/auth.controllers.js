@@ -46,7 +46,7 @@ export const signUp = async (req,res) => {
         return res.status(201).json(user)
 
     } catch (error) {
-        return res.error(500).json({message:`signup error ${error}`})
+        return res.status(500).json({message:`signup error ${error}`})
     }
 }
 
@@ -87,7 +87,7 @@ export const Login = async (req,res) => {
         return res.status(200).json(user)
 
     } catch (error) {
-        return res.error(500).json({message:`Login error ${error}`})
+        return res.status(500).json({message:`Login error ${error}`})
     }
 }
 
