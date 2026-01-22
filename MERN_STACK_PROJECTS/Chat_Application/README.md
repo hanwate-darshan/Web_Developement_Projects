@@ -337,6 +337,37 @@ export default SignUp;
    - index.js
 
 ```
+import express from "express";
+import dotenv from "dotenv"
+import connectDB from "./config/db.js";
+import authRouter from "./routes/auth.routes.js";
+import cookieParser from "cookie-parser";
+import cors from "cors"
+dotenv.config()
+
+const app = express();
+const port = process.env.PORT 
+
+// 🔹 Middleware
+app.use(cors({
+  origin:"http://localhost:5173",
+  credentials:true
+
+}))
+app.use(express.json());
+app.use(cookieParser());
+
+// 🔹 Routes
+app.use("/api/auth", authRouter);
+
+app.get("/", (req, res) => {
+  res.send("Hello World!");
+});
+
+app.listen(port, () => {
+  connectDB()
+  console.log(`Example app listening on port ${port}`)
+})
 
 ```
 
@@ -346,4 +377,240 @@ export default SignUp;
 
 ```
 
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { FaEye } from "react-icons/fa";
+import { IoMdEyeOff } from "react-icons/io";
+
+import { serverURL } from "../main.jsx";
+import axios from "axios"
+
+const Login = () => {
+  const navigate = useNavigate();
+  const [show, setShow] = useState(false);
+    const [email, setEmail] = useState("")
+    const [password, setPassword] = useState("")
+    const [loading, setLoading] = useState(false)
+    const [err, setErr] = useState(false)
+  
+  
+    const handleLogin = async (e) => {
+      e.preventDefault()
+      setLoading(true)
+      try {
+        let result = await axios.post(`${serverURL}/api/auth/login`,
+          {
+             email, password
+          }, { withCredentials: true }
+        )
+        setErr("")
+        setLoading(false)
+        setEmail("")
+        setPassword("")
+        console.log(result)
+      } catch (error) {
+        console.log(`frontend Login error ${error}`)
+        setLoading(false)
+        setErr(error.response.data.message)
+      }
+    }
+
+  return (
+    <div className="w-full min-h-screen bg-linear-to-br from-slate-900 to-slate-800 flex justify-center items-center px-4">
+      
+      {/* Card */}
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden">
+
+        {/* Header */}
+        <div className="h-40 bg-linear-to-r from-pink-500 to-purple-500 flex justify-center items-center rounded-b-[30%]">
+          <h1 className="text-3xl font-bold text-white">
+            Login to 
+            <span className="text-blue-200"> Nano</span>Chat
+          </h1>
+        </div>
+
+        {/* Form */}
+        <form className="p-8 flex flex-col gap-5" onSubmit={handleLogin}>
+
+         
+          <input
+           value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            type="email"
+            placeholder="Email"
+            className="w-full h-11 px-4 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-400 transition"
+          />
+
+          {/* Password */}
+          <div className="relative">
+            <input
+            value={password}
+            onChange={(e)=>setPassword(e.target.value)}
+              type={show ? "text" : "password"}
+              placeholder="Password"
+              className="w-full h-11 px-4 pr-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-400 transition"
+            />
+
+            <span
+              className="absolute right-3 top-3 text-gray-500 text-xl cursor-pointer"
+              onClick={() => setShow((prev) => !prev)}
+            >
+              {show ? <FaEye /> : <IoMdEyeOff />}
+            </span>
+          </div>
+           
+
+           {err && <p className="text-red-500 text-center font-semibold">{err}</p>}
+
+          <button
+          disabled={loading}
+            type="submit"
+            className="mt-4 w-full h-11 bg-pink-500 hover:bg-pink-600 text-white font-semibold rounded-lg transition cursor-pointer"
+          >
+            {loading?"Loading..":"Login"}
+          </button>
+
+          <p
+            className="text-sm text-center text-gray-500 mt-2 cursor-pointer"
+            onClick={() => navigate("/signup")}
+          >
+            want to create a new acccount ?{" "}
+            <span className="text-pink-500 font-bold hover:underline">
+              Sign Up
+            </span>
+          </p>
+
+        </form>
+      </div>
+    </div>
+  );
+};
+
+export default Login;
+
 ```
+
+---
+
+## - Creating Authentication Middleware
+
+  ### - basically in this step ----> cookies ---> token ---> userId se hame pata chalega ki user authorized hai ya nahi hai
+   #### - find token ---> verify token ---> req.userId = verifyToken.userId
+
+
+- middleware
+   - isAuth.js
+
+```
+import jwt from "jsonwebtoken"
+const isAuth = async (req,res,next) => {
+    try {
+        let token = req.cookies.token
+
+        if(!token){
+            res.status(400).json({message:`Token is not found`})
+        }
+
+        let verifyToken = await jwt.verify(token,process.env.JWT_SECRET)
+        req.userId = verifyToken.userId
+        next()
+
+    } catch (error) {
+        return res.status(500).json({message:`isAuth Error ${error}`})
+    }
+}
+```
+
+#### - to get current User details - create controllers
+
+
+- controllers
+   - user.controllers.js
+
+```
+
+```
+
+- routes
+  - user.routes.js
+
+```
+import express from "express"
+import { getCurrentUser } from "../controllers/user.controllers.js";
+import isAuth from "../middlewares/isAuth.js";
+
+
+const userRouter = express.Router();
+
+userRouter.post('/current',isAuth,getCurrentUser)
+
+
+export default userRouter;
+```
+
+
+### setup redux toolkit --
+
+npm i @reduxjs/toolkit
+npm i react-redux
+
+
+#### create a folder --> redux ---> store.js
+
+```
+import {configureStore} from "@reduxjs/toolkit"
+export  const store = configureStore({
+    
+})
+
+```
+
+
+
+
+- main.jsx
+```
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import './index.css'
+import App from './App.jsx'
+import { BrowserRouter } from "react-router-dom";
+import {Provider} from "react-redux"
+import { store } from './redux/store.js';
+export const serverURL = "http://localhost:3000";
+
+createRoot(document.getElementById('root')).render(
+  
+
+  <BrowserRouter>
+  <Provider store={store}>
+  <App />
+  </Provider>
+  </BrowserRouter>
+  
+)
+
+
+```
+
+-- redux 
+  - store.js
+  ```
+
+  ```
+
+
+  - userSlice.js
+
+  ```
+  import { createSlice } from "@reduxjs/toolkit";
+
+const userSlice = createSlice({
+    name:"user",
+    initialState:{ userData:null , profileData:null },
+    reducers:{ setUserData:(state,action)=>{ state.userData = action.payload  }}
+})
+export const { setUserData } = userSlice.actions;
+
+export default userSlice.reducer
+  ```

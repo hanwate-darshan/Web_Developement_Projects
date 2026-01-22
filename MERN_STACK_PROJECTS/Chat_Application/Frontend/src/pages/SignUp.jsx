@@ -1,10 +1,11 @@
-
-import { useNavigate } from "react-router-dom";
-import { FaEye } from "react-icons/fa";
-import { IoMdEyeOff } from "react-icons/io";
-import { useState } from "react";
-import axios from "axios"
 import { serverURL } from "../main";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios"
+import { IoMdEyeOff } from "react-icons/io";
+import { FaEye } from "react-icons/fa";
+import { useDispatch, useSelector } from "react-redux";
+import { setUserData } from "../redux/userSlice";
 
 
 
@@ -14,19 +15,31 @@ const SignUp = () => {
   const [userName, setUserName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [err, setErr] = useState("")
+  let dispatch = useDispatch()
+  
 
 
   const handleSignUp = async (e) => {
     e.preventDefault()
+    setLoading(true)
     try {
       let result = await axios.post(`${serverURL}/api/auth/signup`,
         {
           userName, email, password
         }, { withCredentials: true }
       )
-      console.log(result)
+      setLoading(false)
+      setUserName("")
+      setEmail("")
+      setPassword("")
+      setErr("")
+      dispatch(setUserData(result.data))
     } catch (error) {
+      setErr(error?.response?.data.message)
       console.log(`frontend signup error ${error}`)
+      setLoading(false)
     }
   }
 
@@ -81,11 +94,18 @@ const SignUp = () => {
             </span>
           </div>
 
+
+
+
+           {err && <p className="text-red-500 text-center font-semibold">{err}</p>}
+
+
           <button
+          disabled={loading}
             type="submit"
             className="mt-4 w-full h-11 bg-pink-500 hover:bg-pink-600 text-white font-semibold rounded-lg transition cursor-pointer"
           >
-            Create Account
+           {loading?"Loading..":"Create Account"}
           </button>
 
           <p

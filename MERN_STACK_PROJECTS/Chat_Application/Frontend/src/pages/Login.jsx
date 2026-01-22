@@ -1,13 +1,46 @@
 
-
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaEye } from "react-icons/fa";
 import { IoMdEyeOff } from "react-icons/io";
-import { useState } from "react";
+
+import { serverURL } from "../main.jsx";
+import axios from "axios"
+import { useDispatch, useSelector } from "react-redux";
+import { setUserData } from "../redux/userSlice.js";
 
 const Login = () => {
   const navigate = useNavigate();
   const [show, setShow] = useState(false);
+    const [email, setEmail] = useState("")
+    const [password, setPassword] = useState("")
+    const [loading, setLoading] = useState(false)
+    const [err, setErr] = useState(false)
+    let dispatch = useDispatch()
+    
+  
+  
+    const handleLogin = async (e) => {
+      
+      e.preventDefault()
+      setLoading(true)
+      try {
+        let result = await axios.post(`${serverURL}/api/auth/login`,
+          {
+             email, password
+          }, { withCredentials: true }
+        )
+        setErr("")
+        setLoading(false)
+        setEmail("")
+        setPassword("")
+        dispatch(setUserData(result.data))
+      } catch (error) {
+        console.log(`frontend Login error ${error}`)
+        setLoading(false)
+        setErr(error.response.data.message)
+      }
+    }
 
   return (
     <div className="w-full min-h-screen bg-linear-to-br from-slate-900 to-slate-800 flex justify-center items-center px-4">
@@ -24,10 +57,12 @@ const Login = () => {
         </div>
 
         {/* Form */}
-        <form className="p-8 flex flex-col gap-5">
+        <form className="p-8 flex flex-col gap-5" onSubmit={handleLogin}>
 
          
           <input
+           value={email}
+            onChange={(e) => setEmail(e.target.value)}
             type="email"
             placeholder="Email"
             className="w-full h-11 px-4 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-400 transition"
@@ -36,6 +71,8 @@ const Login = () => {
           {/* Password */}
           <div className="relative">
             <input
+            value={password}
+            onChange={(e)=>setPassword(e.target.value)}
               type={show ? "text" : "password"}
               placeholder="Password"
               className="w-full h-11 px-4 pr-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-400 transition"
@@ -48,12 +85,16 @@ const Login = () => {
               {show ? <FaEye /> : <IoMdEyeOff />}
             </span>
           </div>
+           
+
+           {err && <p className="text-red-500 text-center font-semibold">{err}</p>}
 
           <button
+          disabled={loading}
             type="submit"
             className="mt-4 w-full h-11 bg-pink-500 hover:bg-pink-600 text-white font-semibold rounded-lg transition cursor-pointer"
           >
-            Login
+            {loading?"Loading..":"Login"}
           </button>
 
           <p
