@@ -614,3 +614,86 @@ export const { setUserData } = userSlice.actions;
 
 export default userSlice.reducer
   ```
+
+
+
+
+## Image Setup :
+
+### config ---> cloudinary.js
+#### go to cloudinary website and get api key
+```
+import { v2 as cloudinary } from 'cloudinary';
+import fs from "fs"
+
+const uploadOnCloudinary = async (filePath) => {
+    cloudinary.config({
+        cloud_name: process.env.CLOUD_NAME, 
+        api_key: process.env.CLOUDINARY_API_KEY, 
+        api_secret: process.env.CLOUDINARY_API_SECRET
+    })
+
+
+    try {
+        const uploadResult = await cloudinary.uploader.upload(filePath)
+        fs.unlinkSync(filePath)
+        return uploadResult.secure_url
+    } catch (error) {
+        fs.unlinkSync(filePath)
+        console.log(error)
+    }
+}
+
+export default uploadOnCloudinary;
+```
+
+## now setup multer ---> middleware
+
+- multer.js
+
+```
+import multer from "multer"
+
+const storage = multer.diskStorage({
+    destination:(req,file,cb)=>{
+        cb(null,"./public")
+    },
+    filename:(req,file,cb)=>{
+        cb(null,file.originalname)
+    }
+})
+
+export const upload = multer.MulterError({storage})
+
+```
+
+- controllers
+ 
+ user.controllers.js
+
+```
+
+```
+
+
+- routes
+
+  - user.routes.js
+
+
+```
+import express from "express"
+import { editProfile, getCurrentUser } from "../controllers/user.controllers.js";
+import isAuth from "../middlewares/isAuth.js";
+import { upload } from "../middlewares/multer.js";
+
+
+const userRouter = express.Router();
+
+userRouter.get('/current',isAuth,getCurrentUser)
+userRouter.put('/profile',isAuth,upload.single("image"),editProfile)
+
+
+export default userRouter;
+
+```

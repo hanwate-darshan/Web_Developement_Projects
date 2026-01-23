@@ -9,14 +9,14 @@ import Profile from './pages/Profile.jsx'
 
 const App = () => {
   getCurrentUser();
-  let {userData} = useSelector(state=>state.user)
+  let { userData } = useSelector(state => state.user)
   return (
     <div>
       <Routes>
-        <Route path='/login' element={!userData ? <Login />:<Navigate to="/" /> }/>
-        <Route path='/signup' element={!userData ? <SignUp />: <Navigate to="/profile" /> }/>
-        <Route path='/' element={userData?<Home />:<Navigate to="/login" />}/>
-        <Route path='/profile' element={userData ? <Profile />: <Navigate to="/signup" />}/>
+        <Route path='/login' element={!userData ? <Login /> : <Navigate to="/" />} />
+        <Route path='/signup' element={!userData ? <SignUp /> : <Navigate to="/profile" />} />
+        <Route path='/' element={userData ? <Home /> : <Navigate to="/login" />} />
+        <Route path='/profile' element={userData ? <Profile /> : <Navigate to="/signup" />} />
       </Routes>
     </div>
   )
