@@ -36,6 +36,7 @@ const SignUp = () => {
       setPassword("")
       setErr("")
       dispatch(setUserData(result.data))
+      navigate("/profile")
     } catch (error) {
       setErr(error?.response?.data.message)
       console.log(`frontend signup error ${error}`)

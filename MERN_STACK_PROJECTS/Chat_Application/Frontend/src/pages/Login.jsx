@@ -35,6 +35,7 @@ const Login = () => {
         setEmail("")
         setPassword("")
         dispatch(setUserData(result.data))
+        navigate("/")
       } catch (error) {
         console.log(`frontend Login error ${error}`)
         setLoading(false)

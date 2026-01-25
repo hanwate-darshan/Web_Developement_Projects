@@ -27,7 +27,7 @@ export const editProfile = async (req,res) => {
             name,
             image
 
-        })
+        },{new:true})
 
         if(!user){
             return res.status(400).json({message:"user is not found"})
