@@ -155,11 +155,11 @@ import { RxCross2 } from "react-icons/rx";
 import { RiLogoutCircleLine } from "react-icons/ri";
 import axios from "axios";
 import { serverURL } from "../main";
-import { setOtherUsers, setUserData } from "../redux/userSlice";
+import { setOtherUsers, setSelectedUser, setUserData } from "../redux/userSlice";
 import { useNavigate } from "react-router-dom";
 
 const Sidebar = () => {
-  const { userData, otherUsers } = useSelector((state) => state.user);
+  const { userData, otherUsers , selectedUser} = useSelector((state) => state.user);
   const [search, setSearch] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -178,7 +178,7 @@ const Sidebar = () => {
   };
 
   return (
-    <div className="lg:w-[30%] w-full h-screen bg-white border-r border-gray-200 flex flex-col relative">
+    <div className={`lg:w-[30%] w-full h-screen bg-white border-r border-gray-200 flex flex-col relative lg:block  ${!selectedUser?"block":"hidden"} `}>
 
       {/* Logout */}
       <button
@@ -252,7 +252,7 @@ const Sidebar = () => {
             {otherUsers.map((user) => (
               <div
                 key={user._id}
-                className="relative flex-shrink-0"
+                className="relative shrink-0"
               >
                 <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-green-400">
                   <img
@@ -277,6 +277,7 @@ const Sidebar = () => {
           <div
             key={user._id}
             className="flex items-center gap-4 px-3 py-2 rounded-lg cursor-pointer hover:bg-gray-100 transition"
+            onClick={()=>dispatch(setSelectedUser(user))}
           >
             <div className="w-12 h-12 rounded-full overflow-hidden border">
               <img
