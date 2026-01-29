@@ -523,6 +523,8 @@ const isAuth = async (req,res,next) => {
 
 #### - to get current User details - create controllers
 
+- authorization to check wheather the user is Authorized or not.
+
 
 - controllers
    - user.controllers.js
