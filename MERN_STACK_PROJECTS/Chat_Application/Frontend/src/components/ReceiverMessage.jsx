@@ -1,14 +1,30 @@
-import React from 'react'
-import dp from '../assets/dp.png'
+import React from "react";
+import dp from "../assets/dp.png";
+
 const ReceiverMessage = () => {
   return (
-    <div className='w-fit max-w-125 bg-amber-600 px-5 py-2 text-2xl text-white relative left-0 mr-auto flex flex-col'>
-          
-          <img src={dp} alt="" className='w-25 rounded-lg'  />
-          
-          <span>hi</span>
-        </div>
-  )
-}
+    <div className="flex justify-start mb-3 px-2">
+      <div className="max-w-[70%] bg-white border border-gray-200 text-gray-800 rounded-2xl rounded-bl-sm px-4 py-2 shadow-sm flex flex-col gap-2">
 
-export default ReceiverMessage
+        {/* Image (optional) */}
+        <img
+          src={dp}
+          alt="received"
+          className="w-40 rounded-lg object-cover"
+        />
+
+        {/* Message text */}
+        <span className="text-sm leading-relaxed">
+          Hi
+        </span>
+
+        {/* Time */}
+        <span className="text-[10px] text-gray-400 self-end">
+          10:46 AM
+        </span>
+      </div>
+    </div>
+  );
+};
+
+export default ReceiverMessage;
