@@ -1,57 +1,4 @@
-// import React from 'react'
-// import Card from '../components/Card.jsx'
-// import image1 from "../assets/image1.png"
-// import image2 from "../assets/image2.jpg"
-// import image3 from "../assets/image4.png"
-// import image4 from "../assets/image5.png"
-// import image5 from "../assets/image6.jpeg"
-// import image6 from "../assets/image7.jpeg"
-// import image7 from "../assets/authBg.png"
-// import { RiImageAiFill } from "react-icons/ri";
-
-// const Customized = () => {
-//   return (
-//     <div className='w-full h-screen overflow-auto  flex justify-center items-center bg-linear-to-t from-[black] to-[#0a0a69]'>
-//       <h1>Select your <span>Assistant Image</span> </h1>
-//       <div className='w-[90%] max-w-[60%] flex justify-center items-center flex-wrap gap-10  '>
-
-//       <Card image={image1} />
-//       <Card image={image2} />
-//       <Card image={image3} />
-//       <Card image={image4} />
-//       <Card image={image5} />
-//       <Card image={image6} />
-//       <Card image={image7} />
-//       <div
-//       className="w-37.5 h-62.5 bg-[#090945] border-2 border-blue-800 
-//       rounded-2xl overflow-hidden cursor-pointer
-//       transition-all duration-300 ease-in-out
-//       hover:scale-105 hover:shadow-2xl hover:shadow-blue-600/40
-//       hover:border-blue-400 flex items-center justify-center"
-//     >
-//       <RiImageAiFill  className='text-5xl text-white' />
-//     </div>
-//       </div>
-//     <button>Next</button>
-      
-//     </div>
-//   )
-// }
-
-// export default Customized
-
-
-
-
-
-
-
-
-
-
-
-
-import React from "react";
+import React, { useContext, useRef, useState } from "react";
 import Card from "../components/Card.jsx";
 import image1 from "../assets/image1.png";
 import image2 from "../assets/image2.jpg";
@@ -61,8 +8,18 @@ import image5 from "../assets/image6.jpeg";
 import image6 from "../assets/image7.jpeg";
 import image7 from "../assets/authBg.png";
 import { RiImageAiFill } from "react-icons/ri";
+import { userDataContext } from "../context/UserContext.jsx";
 
 const Customized = () => {
+ 
+  let inputImage = useRef()
+   const { serverUrl , userData , setUserData , frontendImage, setFrontendImage , BackendImage, setBackendImage , selectedImage ,setSelectedImage} = useContext(userDataContext)
+
+  const handleImage = (e) =>{
+      const file = e.target.files[0]
+      setBackendImage(file)
+      setFrontendImage(URL.createObjectURL(file))
+  }
   return (
     <div
       className="w-full min-h-screen overflow-auto 
@@ -96,20 +53,37 @@ const Customized = () => {
         <Card image={image7} />
 
         {/* AI Custom Card */}
+   
+
+
+
         <div
-          className="w-35 h-55 sm:w-37.5 sm:h-60 
+          className= {`w-35 h-55 sm:w-37.5 sm:h-60 
           bg-[#090945] border-2 border-blue-800 
           rounded-2xl overflow-hidden cursor-pointer
           transition-all duration-300 ease-in-out
           hover:scale-105 hover:shadow-2xl hover:shadow-blue-600/40
-          hover:border-blue-400 flex items-center justify-center"
-        >
-          <RiImageAiFill className="text-5xl text-white" />
+          hover:border-blue-400 flex items-center justify-center ${selectedImage == "input" ? "border-8 border-white-800":null} `}
+
+          onClick={()=>{
+            inputImage.current.click()
+            setSelectedImage("input")
+          }}
+          >
+          {!frontendImage && <RiImageAiFill className="text-5xl text-white" />}
+            {frontendImage && <img src={frontendImage} className="h-full object-cover" /> }
+          
         </div>
       </div>
 
+
+      <input type="file" accept="image/*" hidden ref={inputImage}   onChange={handleImage} />
+
+
+
       {/* Button */}
-      <button
+
+      {selectedImage && <button
         className="mt-12 px-10 py-3 rounded-full 
         bg-blue-500 hover:bg-blue-600 
         text-white font-semibold text-lg
@@ -117,7 +91,8 @@ const Customized = () => {
         transition-all duration-300 active:scale-95 cursor-pointer"
       >
         Next
-      </button>
+      </button>}
+      
     </div>
   );
 };
