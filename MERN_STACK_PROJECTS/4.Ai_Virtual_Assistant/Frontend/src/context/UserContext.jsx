@@ -1,9 +1,29 @@
-import React, { createContext } from 'react'
+import React, { createContext, useState } from 'react'
 export const userDataContext = createContext()
+import axios from "axios"
+import { useEffect } from 'react';
+
 const UserContext = ({children}) => {
-    const serverUrl = `http://localhost:3000`
+    const serverUrl = `http://localhost:3000`;
+
+    const [userData,setUserData] = useState(null)
+    
+    const handleCurrentUser = async () => {
+      try {
+        let result = await axios.get(`${serverUrl}/api/user/current`,{withCredentials:true})
+        setUserData(result.data)
+        console.log(result.data)
+      } catch (error) {
+        console.log(error)
+      }
+    }
+
+    useEffect(()=>{
+        handleCurrentUser()
+    },[])
+
     const value = {
-        serverUrl
+        serverUrl , userData , setUserData
     }
   return (
     <div>

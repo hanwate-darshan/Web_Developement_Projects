@@ -611,5 +611,538 @@ export default Login;
 
 
 
-
+## Authorization :
 ### abhi iske baad authorization ka middleware banana hai
+
+- middleware ---> isAuth.js
+
+```
+import jwt from "jsonwebtoken"
+const isAuth = async (req,res,next) => {
+    try {
+        const token = req.cookies.token
+        if(!token){
+            return res.status(400).json({message:`token not found `})
+        }
+
+        const verifyToken = await jwt.verify(token,process.env.JWT_SECRET)
+
+        req.userId = verifyToken.userId
+        next()
+
+        
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({message:`isAuth error ${error}`})
+    }
+}
+
+export default isAuth
+```
+
+
+
+
+
+
+### create new controller 
+
+- controller ---> user.controller.js
+
+```
+import User from "../models/user.model.js"
+
+export const getCurrentUser = async (req,res) => {
+    try {
+        const userId = req.userId
+        const user = await User.findById(userId).select("-password")
+        if(!user){
+            return res.status(400).json({message:`user not found`})
+        }
+        return res.status(200).json(user)
+    } catch (error) {
+        return res.status(400).json({message:`get current user error ${error}`})
+        
+    }
+    
+}
+
+```
+
+
+### now create route for this
+
+route ---> user.routes.js
+
+```
+import express from "express"
+import { getCurrentUser } from "../controllers/user.controller.js";
+
+const userRouter  = express.Router();
+
+
+userRouter.get("/current",isAuth,getCurrentUser)
+
+export default userRouter
+
+```
+
+
+- index.js
+
+```
+import express from "express"
+import dotenv from "dotenv"
+dotenv.config()
+import connectDB from "./config/db.js";
+import authRouter from "./routes/auth.routes.js";
+import cookieParser from "cookie-parser";
+import cors from "cors"
+import userRouter from "./routes/user.routes.js";
+
+const app = express()
+const port = process.env.PORT;
+
+app.use(cors({
+  origin:"http://localhost:5173",
+  credentials:true
+}))
+app.use(express.json())
+app.use(cookieParser())
+app.use("/api/auth",authRouter)
+app.use("/api/user",userRouter)
+
+app.get('/', (req, res) => {
+  res.send('Hello World!')
+})
+
+app.listen(port, () => {
+  connectDB();
+  console.log(`Example app listening on port ${port}`)
+})
+
+```
+
+### now setup cloudinary image and image handling 
+
+- config ----> cloudinary.js
+
+```
+import { v2 as cloudinary } from 'cloudinary';
+import fs from "fs"
+
+const uploadOnCloudinary = async (filePath) => {
+    cloudinary.config({ 
+        cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
+        api_key: process.env.CLOUDINARY_API_KEY, 
+        api_secret: process.env.CLOUDINARY_API_SECRET
+    });
+
+    try {
+    const uploadResult = await cloudinary.uploader.upload(filePath)
+    fs.unlinkSync(filePath)
+    return uploadResult.secure_url
+} catch (error) {
+        fs.unlinkSync(filePath)
+        return res.status(500).json({message:"cloudinary error"})
+        
+    }
+}
+
+export default uploadOnCloudinary
+```
+
+
+- middleware -----> multer.js
+
+```
+import multer from "multer"
+
+const storage = multer.diskStorage({
+    destination:(req,file,cb)=>{
+        cb(null,"./public")
+    },
+    filename:(req,file,cb)=>{
+        cb(null,file.originalname)
+    }
+})
+
+const upload = multer({storage})
+
+export default upload;
+```
+
+### now move to the frontend
+
+fetch current user api
+
+- userContext.jsx
+
+```
+import React, { createContext, useState } from 'react'
+export const userDataContext = createContext()
+import axios from "axios"
+import { useEffect } from 'react';
+
+const UserContext = ({children}) => {
+    const serverUrl = `http://localhost:3000`;
+
+    const [userData,setUserData] = useState(null)
+    
+    const handleCurrentUser = async () => {
+      try {
+        let result = await axios.get(`${serverUrl}/api/user/current`,{withCredentials:true})
+        setUserData(result.data)
+        console.log(result.data)
+      } catch (error) {
+        console.log(error)
+      }
+    }
+
+    useEffect(()=>{
+        handleCurrentUser()
+    },[])
+
+    const value = {
+        serverUrl , userData,setUserData
+    }
+  return (
+    <div>
+        <userDataContext.Provider value={value}>
+
+        {children}
+        </userDataContext.Provider>
+    </div>
+  )
+}
+
+export default UserContext
+
+
+```
+
+
+
+### check authorization user if not then move to the home page:
+
+
+- app.jsx
+
+```
+import React, { useContext } from 'react'
+import { Navigate, Route, Routes } from 'react-router-dom'
+import SignUp from './pages/SignUp.jsx'
+import Login from './pages/Login.jsx'
+import Customized from './pages/Customized.jsx'
+import { userDataContext } from './context/UserContext.jsx'
+import Home from './pages/Home.jsx'
+
+
+const App = () => {
+  const {userData,setUserData} = useContext(userDataContext)
+  return (
+    <div>
+      <Routes>
+        <Route path="/" element={(userData?.assistantImage && userData?.assistantName)? <Home /> : <Navigate to={"/customize"} />} />
+        <Route path="/signup" element={!userData? <SignUp />: <Navigate to={"/"} />} />
+        <Route path="/login" element={!userData? <Login /> : <Navigate to={"/"} />} />
+        <Route path="/customize" element={userData?<Customized />:<Navigate to={"/login"} />} />
+      </Routes>
+    </div>
+  )
+}
+
+export default App
+
+```
+
+
+- SignUp.jsx
+
+```
+
+import React, { useState } from "react";
+import authBg from "../assets/authBg.png";
+import { ImEye } from "react-icons/im";
+import { ImEyeBlocked } from "react-icons/im";
+import {useNavigate} from "react-router-dom"
+import { useContext } from "react";
+import { userDataContext } from "../context/UserContext.jsx";
+import axios from "axios"
+
+
+const SignUp = () => {
+
+  const [showPassword, setShowPassword] = useState(false)
+  const navigate = useNavigate()
+  const [Name, setName] = useState("")
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const {serverUrl ,  userData,setUserData} = useContext(userDataContext)
+  const [err, setErr] = useState("")
+  const [loading, setLoading] = useState(false)
+
+
+  const handleSignUp = async (e) => {
+    e.preventDefault()
+    setErr("")
+    setLoading(true)
+    try {
+      let result = await axios.post(`${serverUrl}/api/auth/signup`,{
+        Name,email,password                            
+      },{withCredentials:true})
+      
+      setUserData(result.data)
+      setLoading(false)
+      navigate("/customize")
+
+      
+    } catch (error) {
+      console.log(error)
+      setUserData(null)
+      setErr(error.response.data.message)
+      setLoading(false)
+      
+    }
+  }
+
+  return (
+    <div
+    
+      className="w-full h-screen flex items-center justify-center px-4"
+      style={{
+        backgroundImage: `url(${authBg})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center center",
+        backgroundRepeat: "no-repeat",
+      }}
+    >
+      <form className="w-[90%] max-w-lg bg-white/10 backdrop-blur-xl 
+      border border-white/20 shadow-2xl shadow-blue-900/50 
+      rounded-3xl flex justify-center items-center flex-col 
+      px-8 py-10 gap-6" onSubmit={handleSignUp}>
+
+        {/* Heading */}
+        <h1 className="text-3xl font-bold text-white tracking-wide">
+          SignUp to{" "}
+          <span className="text-blue-400 drop-shadow-lg">
+            Virtual Assistant
+          </span>
+        </h1>
+
+        {/* Input Fields */}
+        <input
+          type="text"
+          placeholder="Enter Your Name"
+          className="w-full px-5 py-3 rounded-xl bg-black/40 
+          text-white placeholder-gray-300 outline-none 
+          border border-transparent focus:border-blue-400 
+          focus:ring-2 focus:ring-blue-500 transition"
+          required
+          value={Name}
+          onChange={(e)=>setName(e.target.value)}
+        />
+
+        <input
+          type="email"
+          placeholder="Enter your email"
+          className="w-full px-5 py-3 rounded-xl bg-black/40 
+          text-white placeholder-gray-300 outline-none 
+          border border-transparent focus:border-blue-400 
+          focus:ring-2 focus:ring-blue-500 transition"
+          required
+          value={email}
+          onChange={(e)=>setEmail(e.target.value)}
+        />
+
+        <div className="w-full relative">
+
+        
+        <input
+          type={showPassword ? "text" : "password"}
+          placeholder="Enter your password"
+          className="w-full px-5 py-3 rounded-xl bg-black/40 
+          text-white placeholder-gray-300 outline-none 
+          border border-transparent focus:border-blue-400 
+          focus:ring-2 focus:ring-blue-500 transition "
+          required
+          value={password}
+          onChange={(e)=>setPassword(e.target.value)}
+
+          />
+  
+
+           {!showPassword && <ImEye className="absolute top-4 right-5 text-gray-300 text-xl cursor-pointer" onClick={()=>setShowPassword(true)}/> }
+
+            {showPassword && <ImEyeBlocked  className="absolute top-4 right-5 text-gray-300 text-xl cursor-pointer" onClick={()=>setShowPassword(false)}/> }
+
+          
+          
+          </div>
+
+          {err.length> 0 && <p className="text-red-500">{err}</p>}
+
+        {/* Button */}
+        <button
+          className="w-full py-3 rounded-xl bg-blue-500 
+          hover:bg-blue-600 active:scale-95 
+          transition font-semibold text-white shadow-lg 
+          shadow-blue-600/40 cursor-pointer"
+          disabled={loading}
+        >
+          {loading ? "Loading..." : "Sign Up"}
+        </button>
+        <p onClick={()=>navigate("/login")} className="text-gray-300 cursor-pointer">Already have an account ? <span className="font-bold text-blue-300 
+          hover:text-blue-400 ">Login</span> </p>
+      </form>
+    </div>
+  );
+};
+
+export default SignUp;
+
+
+```
+
+
+- Login.jsx
+
+```
+import React, { useState } from "react";
+import authBg from "../assets/authBg.png";
+import { ImEye } from "react-icons/im";
+import { ImEyeBlocked } from "react-icons/im";
+import {useNavigate} from "react-router-dom"
+import { useContext } from "react";
+import { userDataContext   } from "../context/UserContext.jsx";
+import axios from "axios"
+
+
+const Login = () => {
+
+  const [showPassword, setShowPassword] = useState(false)
+  const navigate = useNavigate()
+  
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const {serverUrl,userData,setUserData} = useContext(userDataContext)
+  const [err, setErr] = useState("")
+  const [loading,setLoading] = useState(false)
+
+
+
+  const handleLogin = async (e) => {
+    e.preventDefault()
+    setErr("")
+    setLoading(true)
+    try {
+      let result = await axios.post(`${serverUrl}/api/auth/login`,{
+        email,password                            
+      },{withCredentials:true})
+
+      
+      setUserData(result.data)
+      setLoading(false)
+      navigate("/")
+    } catch (error) {
+      console.log(error)
+      setErr(error.response.data.message)
+      setLoading(false)
+      setUserData(null)
+    }
+  }
+
+  return (
+    <div
+    
+      className="w-full h-screen flex items-center justify-center px-4"
+      style={{
+        backgroundImage: `url(${authBg})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center center",
+        backgroundRepeat: "no-repeat",
+      }}
+    >
+      <form className="w-[90%] max-w-lg bg-white/10 backdrop-blur-xl 
+      border border-white/20 shadow-2xl shadow-blue-900/50 
+      rounded-3xl flex justify-center items-center flex-col 
+      px-8 py-10 gap-6" onSubmit={handleLogin}>
+
+        {/* Heading */}
+        <h1 className="text-3xl font-bold text-white tracking-wide">
+          Login to{" "}
+          <span className="text-blue-400 drop-shadow-lg">
+            Virtual Assistant
+          </span>
+        </h1>
+
+        
+
+        <input
+          type="email"
+          placeholder="Enter your email"
+          className="w-full px-5 py-3 rounded-xl bg-black/40 
+          text-white placeholder-gray-300 outline-none 
+          border border-transparent focus:border-blue-400 
+          focus:ring-2 focus:ring-blue-500 transition"
+          required
+          value={email}
+          onChange={(e)=>setEmail(e.target.value)}
+        />
+
+        <div className="w-full relative">
+
+        
+        <input
+          type={showPassword ? "text" : "password"}
+          placeholder="Enter your password"
+          className="w-full px-5 py-3 rounded-xl bg-black/40 
+          text-white placeholder-gray-300 outline-none 
+          border border-transparent focus:border-blue-400 
+          focus:ring-2 focus:ring-blue-500 transition "
+          required
+          value={password}
+          onChange={(e)=>setPassword(e.target.value)}
+
+          />
+  
+
+           {!showPassword && <ImEye className="absolute top-4 right-5 text-gray-300 text-xl cursor-pointer" onClick={()=>setShowPassword(true)}/> }
+
+            {showPassword && <ImEyeBlocked  className="absolute top-4 right-5 text-gray-300 text-xl cursor-pointer" onClick={()=>setShowPassword(false)}/> }
+
+          
+          
+          </div>
+
+          {err.length> 0 && <p className="text-red-500">{err}</p>}
+
+        {/* Button */}
+        <button
+          className="w-full py-3 rounded-xl bg-blue-500 
+          hover:bg-blue-600 active:scale-95 
+          transition font-semibold text-white shadow-lg 
+          shadow-blue-600/40 cursor-pointer"
+          disabled={loading}
+        >
+          {loading ? "Loading..":"Login"}
+        </button>
+        <p onClick={()=>navigate("/signup")} className="text-gray-300 cursor-pointer">Want to create an new account ? <span className="font-bold text-blue-300 
+          hover:text-blue-400 ">Sign up</span> </p>
+      </form>
+    </div>
+  );
+};
+
+export default Login;
+
+
+```
+
+
+
+
+### now create a customization page :
+
+
+- 

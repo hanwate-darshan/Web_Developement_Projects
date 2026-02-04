@@ -16,7 +16,7 @@ const SignUp = () => {
   const [Name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const {serverUrl} = useContext(userDataContext)
+  const {serverUrl ,  userData,setUserData} = useContext(userDataContext)
   const [err, setErr] = useState("")
   const [loading, setLoading] = useState(false)
 
@@ -30,10 +30,14 @@ const SignUp = () => {
         Name,email,password                            
       },{withCredentials:true})
       
+      setUserData(result.data)
       setLoading(false)
-      console.log(result.data)
+      navigate("/customize")
+
+      
     } catch (error) {
       console.log(error)
+      setUserData(null)
       setErr(error.response.data.message)
       setLoading(false)
       

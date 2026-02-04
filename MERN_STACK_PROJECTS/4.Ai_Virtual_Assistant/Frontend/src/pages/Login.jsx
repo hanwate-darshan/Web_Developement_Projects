@@ -1,11 +1,10 @@
-
 import React, { useState } from "react";
 import authBg from "../assets/authBg.png";
 import { ImEye } from "react-icons/im";
 import { ImEyeBlocked } from "react-icons/im";
 import {useNavigate} from "react-router-dom"
 import { useContext } from "react";
-import { userDataContext } from "../context/UserContext.jsx";
+import { userDataContext   } from "../context/UserContext.jsx";
 import axios from "axios"
 
 
@@ -16,7 +15,7 @@ const Login = () => {
   
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const {serverUrl} = useContext(userDataContext)
+  const {serverUrl,userData,setUserData} = useContext(userDataContext)
   const [err, setErr] = useState("")
   const [loading,setLoading] = useState(false)
 
@@ -31,13 +30,15 @@ const Login = () => {
         email,password                            
       },{withCredentials:true})
 
-      console.log(result.data)
+      
+      setUserData(result.data)
       setLoading(false)
+      navigate("/")
     } catch (error) {
       console.log(error)
       setErr(error.response.data.message)
       setLoading(false)
-      
+      setUserData(null)
     }
   }
 

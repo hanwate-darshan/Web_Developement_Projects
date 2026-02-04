@@ -1,15 +1,21 @@
-import React from 'react'
-import { Route, Routes } from 'react-router-dom'
+import React, { useContext } from 'react'
+import { Navigate, Route, Routes } from 'react-router-dom'
 import SignUp from './pages/SignUp.jsx'
 import Login from './pages/Login.jsx'
+import Customized from './pages/Customized.jsx'
+import { userDataContext } from './context/UserContext.jsx'
+import Home from './pages/Home.jsx'
 
 
 const App = () => {
+  const {userData,setUserData} = useContext(userDataContext)
   return (
     <div>
       <Routes>
-        <Route path="/signup" element={<SignUp />} />
-        <Route path="/login" element={<Login />} />
+        <Route path="/" element={(userData?.assistantImage && userData?.assistantName)? <Home /> : <Navigate to={"/customize"} />} />
+        <Route path="/signup" element={!userData? <SignUp />: <Navigate to={"/"} />} />
+        <Route path="/login" element={!userData? <Login /> : <Navigate to={"/"} />} />
+        <Route path="/customize" element={userData?<Customized />:<Navigate to={"/login"} />} />
       </Routes>
     </div>
   )
