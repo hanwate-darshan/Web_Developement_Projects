@@ -1,4 +1,5 @@
 import User from "../models/user.model.js"
+import uploadOnCloudinary from "../config/cloudinary.js"
 
 export const getCurrentUser = async (req,res) => {
     try {
@@ -13,4 +14,20 @@ export const getCurrentUser = async (req,res) => {
         
     }
     
+}
+
+
+export const updateAssistant = async (req,res) => {
+    try {
+        const {AssistantName,imageUrl} = req.body
+        // const assistantImage;
+
+        // if(req.file){
+        //     assistantImage = await uploadOnCloudinary
+        // }
+
+
+    } catch (error) {
+        
+    }
 }

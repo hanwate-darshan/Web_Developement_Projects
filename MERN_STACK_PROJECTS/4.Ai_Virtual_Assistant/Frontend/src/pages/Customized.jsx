@@ -9,11 +9,14 @@ import image6 from "../assets/image7.jpeg";
 import image7 from "../assets/authBg.png";
 import { RiImageAiFill } from "react-icons/ri";
 import { userDataContext } from "../context/UserContext.jsx";
+import { useNavigate } from "react-router-dom";
 
 const Customized = () => {
  
   let inputImage = useRef()
    const { serverUrl , userData , setUserData , frontendImage, setFrontendImage , BackendImage, setBackendImage , selectedImage ,setSelectedImage} = useContext(userDataContext)
+
+   const navigate = useNavigate()
 
   const handleImage = (e) =>{
       const file = e.target.files[0]
@@ -83,7 +86,8 @@ const Customized = () => {
 
       {/* Button */}
 
-      {selectedImage && <button
+      {selectedImage && <button  
+      onClick={()=>navigate("/customize2")}
         className="mt-12 px-10 py-3 rounded-full 
         bg-blue-500 hover:bg-blue-600 
         text-white font-semibold text-lg

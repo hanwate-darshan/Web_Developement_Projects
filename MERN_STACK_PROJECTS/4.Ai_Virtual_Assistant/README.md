@@ -1409,3 +1409,187 @@ export default Customized;
 ### ham context ki madat se bhi kar sakte hai ye sab 
 
 
+
+
+
+- context ----> UserContext.jsx
+
+```
+
+import React, { createContext, useState } from 'react'
+export const userDataContext = createContext()
+import axios from "axios"
+import { useEffect } from 'react';
+
+const UserContext = ({children}) => {
+    const serverUrl = `http://localhost:3000`;
+
+    const [userData,setUserData] = useState(null)
+     const [frontendImage, setFrontendImage] = useState(null)
+      const [BackendImage, setBackendImage] = useState(null)
+      const [selectedImage,setSelectedImage] = useState(null)
+    
+    const handleCurrentUser = async () => {
+      try {
+        let result = await axios.get(`${serverUrl}/api/user/current`,{withCredentials:true})
+        setUserData(result.data)
+        console.log(result.data)
+      } catch (error) {
+        console.log(error)
+      }
+    }
+
+    useEffect(()=>{
+        handleCurrentUser()
+    },[])
+
+    const value = {
+        serverUrl , userData , setUserData , frontendImage, setFrontendImage , BackendImage, setBackendImage , selectedImage ,setSelectedImage
+    }
+  return (
+    <div>
+        <userDataContext.Provider value={value}>
+
+        {children}
+        </userDataContext.Provider>
+    </div>
+  )
+}
+
+export default UserContext
+
+
+
+```
+
+
+- Customized.jsx
+
+
+```
+import React, { useContext, useRef, useState } from "react";
+import Card from "../components/Card.jsx";
+import image1 from "../assets/image1.png";
+import image2 from "../assets/image2.jpg";
+import image3 from "../assets/image4.png";
+import image4 from "../assets/image5.png";
+import image5 from "../assets/image6.jpeg";
+import image6 from "../assets/image7.jpeg";
+import image7 from "../assets/authBg.png";
+import { RiImageAiFill } from "react-icons/ri";
+import { userDataContext } from "../context/UserContext.jsx";
+import { useNavigate } from "react-router-dom";
+
+const Customized = () => {
+ 
+  let inputImage = useRef()
+   const { serverUrl , userData , setUserData , frontendImage, setFrontendImage , BackendImage, setBackendImage , selectedImage ,setSelectedImage} = useContext(userDataContext)
+
+   const navigate = useNavigate()
+
+  const handleImage = (e) =>{
+      const file = e.target.files[0]
+      setBackendImage(file)
+      setFrontendImage(URL.createObjectURL(file))
+  }
+  return (
+    <div
+      className="w-full min-h-screen overflow-auto 
+      flex flex-col items-center justify-start
+      bg-linear-to-t from-black to-[#0a0a69]
+      px-4 py-10"
+    >
+      {/* Heading */}
+      <h1
+        className="text-2xl sm:text-3xl md:text-4xl 
+        font-bold text-white text-center mb-10"
+      >
+        Select your{" "}
+        <span className="text-blue-400 drop-shadow-lg">
+          Assistant Image
+        </span>
+      </h1>
+
+      {/* Cards Wrapper */}
+      <div
+        className="w-full max-w-6xl 
+        grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 
+        gap-6 place-items-center"
+      >
+        <Card image={image1} />
+        <Card image={image2} />
+        <Card image={image3} />
+        <Card image={image4} />
+        <Card image={image5} />
+        <Card image={image6} />
+        <Card image={image7} />
+
+        {/* AI Custom Card */}
+   
+
+
+
+        <div
+          className= {`w-35 h-55 sm:w-37.5 sm:h-60 
+          bg-[#090945] border-2 border-blue-800 
+          rounded-2xl overflow-hidden cursor-pointer
+          transition-all duration-300 ease-in-out
+          hover:scale-105 hover:shadow-2xl hover:shadow-blue-600/40
+          hover:border-blue-400 flex items-center justify-center ${selectedImage == "input" ? "border-8 border-white-800":null} `}
+
+          onClick={()=>{
+            inputImage.current.click()
+            setSelectedImage("input")
+          }}
+          >
+          {!frontendImage && <RiImageAiFill className="text-5xl text-white" />}
+            {frontendImage && <img src={frontendImage} className="h-full object-cover" /> }
+          
+        </div>
+      </div>
+
+
+      <input type="file" accept="image/*" hidden ref={inputImage}   onChange={handleImage} />
+
+
+
+      {/* Button */}
+
+      {selectedImage && <button  
+      onClick={()=>navigate("/customize2")}
+        className="mt-12 px-10 py-3 rounded-full 
+        bg-blue-500 hover:bg-blue-600 
+        text-white font-semibold text-lg
+        shadow-lg shadow-blue-500/40
+        transition-all duration-300 active:scale-95 cursor-pointer"
+      >
+        Next
+      </button>}
+      
+    </div>
+  );
+};
+
+export default Customized;
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+#### now create a controller for update profile :
+
+
+- controller ----> user.controller.js
+
+```
+
+```

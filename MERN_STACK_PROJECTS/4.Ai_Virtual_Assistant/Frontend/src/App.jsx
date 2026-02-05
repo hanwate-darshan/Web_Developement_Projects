@@ -5,6 +5,7 @@ import Login from './pages/Login.jsx'
 import Customized from './pages/Customized.jsx'
 import { userDataContext } from './context/UserContext.jsx'
 import Home from './pages/Home.jsx'
+import Customized1 from './pages/Customized2.jsx'
 
 
 const App = () => {
@@ -16,6 +17,7 @@ const App = () => {
         <Route path="/signup" element={!userData? <SignUp />: <Navigate to={"/"} />} />
         <Route path="/login" element={!userData? <Login /> : <Navigate to={"/"} />} />
         <Route path="/customize" element={userData?<Customized />:<Navigate to={"/login"} />} />
+        <Route path='/customize2' element={userData?<Customized1 />:<Navigate to={"/login"} />} />
       </Routes>
     </div>
   )
