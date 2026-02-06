@@ -1788,4 +1788,382 @@ export default Home;
 ```
 
 
-### 
+### now all the frontend file looks like this
+
+
+- customized.jsx
+
+```
+import React, { useContext, useRef, useState } from "react";
+import Card from "../components/Card.jsx";
+import image1 from "../assets/image1.png";
+import image2 from "../assets/image2.jpg";
+import image3 from "../assets/image4.png";
+import image4 from "../assets/image5.png";
+import image5 from "../assets/image6.jpeg";
+import image6 from "../assets/image7.jpeg";
+import image7 from "../assets/authBg.png";
+import { RiImageAiFill } from "react-icons/ri";
+import { userDataContext } from "../context/UserContext.jsx";
+import { useNavigate } from "react-router-dom";
+import { IoArrowBackCircle } from "react-icons/io5";
+
+const Customized = () => {
+
+  let inputImage = useRef()
+  const { serverUrl, userData, setUserData, frontendImage, setFrontendImage, BackendImage, setBackendImage, selectedImage, setSelectedImage } = useContext(userDataContext)
+
+  const navigate = useNavigate()
+
+  const handleImage = (e) => {
+    const file = e.target.files[0]
+    setBackendImage(file)
+    setFrontendImage(URL.createObjectURL(file))
+  }
+  return (
+    <div
+      className="w-full min-h-screen overflow-auto 
+      flex flex-col items-center justify-start
+      bg-linear-to-t from-black to-[#0a0a69]
+      px-4 py-10 relative"
+    >
+
+      {/* Heading */}
+      <IoArrowBackCircle onClick={() => navigate("/")} className="absolute top-10 left-10 text-white  text-5xl  transition-all duration-300  hover:scale-95 cursor-pointer" />
+      <h1
+        className="text-2xl sm:text-3xl md:text-4xl 
+        font-bold text-white text-center mb-10"
+      >
+        Select your{" "}
+        <span className="text-blue-400 drop-shadow-lg">
+          Assistant Image
+        </span>
+      </h1>
+
+      {/* Cards Wrapper */}
+      <div
+        className="w-full max-w-6xl 
+        grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 
+        gap-6 place-items-center"
+      >
+        <Card image={image1} />
+        <Card image={image2} />
+        <Card image={image3} />
+        <Card image={image4} />
+        <Card image={image5} />
+        <Card image={image6} />
+        <Card image={image7} />
+
+        {/* AI Custom Card */}
+
+
+
+
+        <div
+          className={`w-35 h-55 sm:w-37.5 sm:h-60 
+          bg-[#090945] border-2 border-blue-800 
+          rounded-2xl overflow-hidden cursor-pointer
+          transition-all duration-300 ease-in-out
+          hover:scale-105 hover:shadow-2xl hover:shadow-blue-600/40
+          hover:border-blue-400 flex items-center justify-center ${selectedImage == "input" ? "border-8 border-white-800" : null} `}
+
+          onClick={() => {
+            inputImage.current.click()
+            setSelectedImage("input")
+          }}
+        >
+          {!frontendImage && <RiImageAiFill className="text-5xl text-white" />}
+          {frontendImage && <img src={frontendImage} className="h-full object-cover" />}
+
+        </div>
+      </div>
+
+
+      <input type="file" accept="image/*" hidden ref={inputImage} onChange={handleImage} />
+
+
+
+      {/* Button */}
+
+      {selectedImage && <button
+        onClick={() => navigate("/customize2")}
+        className="mt-12 px-10 py-3 rounded-full 
+        bg-blue-500 hover:bg-blue-600 
+        text-white font-semibold text-lg
+        shadow-lg shadow-blue-500/40
+        transition-all duration-300 active:scale-95 cursor-pointer"
+      >
+        Next
+      </button>}
+
+    </div>
+  );
+};
+
+export default Customized;
+
+```
+
+- customized2.jsx
+
+```
+import React, { useContext, useState } from "react";
+import { userDataContext } from "../context/UserContext.jsx";
+import { IoArrowBackCircle } from "react-icons/io5";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+
+const Customized1 = () => {
+  const {userData,backendImage,selectedImage,serverUrl,setUserData} = useContext(userDataContext)
+  // const [AssistantName, setAssistantName] = useState(userData?.AssistantName || " ")
+  const [assistantName, setAssistantName] = useState(userData?.assistantName)
+  const [loading,setLoading] = useState(false)
+  const navigate = useNavigate()
+
+  const handleUpdateAssistant = async () => {
+    setLoading(true)
+    try {
+      let formData = new FormData()
+      formData.append("assistantName",assistantName)
+      if(backendImage){
+        formData.append("assistantImage",backendImage)
+      }else{
+        formData.append("imageUrl",selectedImage)
+      }
+      let result = await axios.post(`${serverUrl}/api/user/update`,formData,{withCredentials:true})
+      console.log(result.data)
+      setUserData(result.data)
+      setLoading(false)
+      navigate("/")
+    } catch (error) {
+      console.log(error)
+      setLoading(false)
+    }
+  }
+  return (
+
+
+
+    <div
+      className="w-full min-h-screen overflow-auto 
+      flex flex-col items-center justify-center
+      bg-linear-to-t from-black to-[#0a0a69]
+      px-4 py-10 relative"
+    >
+      <IoArrowBackCircle onClick={()=>navigate("/customize")} className="absolute top-15 left-15 text-white  text-5xl  
+
+        transition-all duration-300 
+        hover:scale-95 cursor-pointer" />
+      {/* Heading */}
+      <h1
+        className="text-2xl sm:text-3xl md:text-4xl 
+        font-bold text-white text-center mb-10"
+      >
+        Enter Your{" "}
+        <span className="text-blue-400 drop-shadow-lg">
+          Assistant Name
+        </span>
+      </h1>
+
+      {/* Input */}
+      <input
+      onChange={(e)=>setAssistantName(e.target.value)}
+      value={assistantName}
+        type="text"
+        placeholder="eg. Gemini"
+        className="w-full max-w-md px-6 py-4 rounded-xl
+        bg-[#090945] border-2 border-blue-700
+        text-white placeholder-gray-400
+        outline-none focus:border-blue-400
+        focus:ring-2 focus:ring-blue-500
+        transition-all duration-300"
+      />
+ 
+
+       {assistantName && 
+      <button
+        className="mt-12 px-8 py-3 rounded-full 
+        bg-blue-500 hover:bg-blue-600 
+        text-white font-semibold text-lg
+        shadow-lg shadow-blue-500/40
+        transition-all duration-300 
+        active:scale-95 cursor-pointer"
+        disabled={loading}
+        onClick={handleUpdateAssistant}
+      >
+        {!loading ? "Finally Create Your Assistant":"Loading..."}
+      </button>}
+
+
+
+      
+    </div>
+  );
+};
+
+export default Customized1;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```
+
+- home.jsx
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import React, { useContext } from "react";
+import { userDataContext } from "../context/UserContext.jsx";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+
+const Home = () => {
+  const { userData , serverUrl , setUserData } = useContext(userDataContext);
+  const navigate = useNavigate()
+
+  const handleLogOut = async () => {
+    try {
+      let result = await axios.get(`${serverUrl}/api/auth/logout`,{withCredentials:true})
+      setUserData(null)
+      navigate("/signup")
+    } catch (error) {
+      console.log(error)
+      setUserData(null)
+    }
+  }
+
+
+  return (
+    <div
+      className="w-full min-h-screen 
+      bg-linear-to-br from-black via-[#06063a] to-[#0a0a69]
+      flex flex-col items-center px-4 py-8"
+    >
+      {/* Top Action Bar */}
+      <div className="w-full max-w-6xl flex justify-between items-center mb-10">
+        <h1 className="text-xl sm:text-2xl font-semibold text-white tracking-wide ">
+          Dashboard
+        </h1>
+
+        <div className="flex gap-3">
+          <button
+            className="px-5 py-2 rounded-full
+            bg-blue-500/90 hover:bg-blue-600
+            text-white text-sm font-semibold
+            transition-all duration-300 active:scale-95 cursor-pointer"
+            onClick={()=>navigate("/customize")}
+            >
+            Customize
+          </button>
+
+          <button
+            className="px-5 py-2 rounded-full
+            bg-red-500/90 hover:bg-red-600
+            text-white text-sm font-semibold
+            transition-all duration-300 active:scale-95 cursor-pointer"
+            onClick={handleLogOut}
+          >
+            Log Out
+          </button>
+        </div>
+      </div>
+
+      {/* Assistant Showcase */}
+      <div
+        className="w-full max-w-sm sm:max-w-md md:max-w-lg
+        bg-white/10 backdrop-blur-xl
+        border border-white/20
+        rounded-3xl shadow-2xl
+        flex flex-col items-center
+        p-6 gap-6"
+      >
+        {/* Image */}
+        <div className="w-full h-72 sm:h-80 rounded-2xl overflow-hidden relative">
+          <img
+            src={userData?.assistantImage}
+            alt="Assistant"
+            className="w-full h-full object-cover"
+          />
+
+          {/* Glow overlay */}
+          <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
+        </div>
+
+        {/* Name */}
+        <h2 className="text-xl sm:text-2xl font-semibold text-white">
+          I’m{" "}
+          <span className="text-blue-400 tracking-wide">
+            {userData?.assistantName}
+          </span>
+        </h2>
+
+        {/* Sub text */}
+        <p className="text-sm text-gray-300 text-center max-w-xs">
+          Your personalized virtual assistant is ready to help you anytime.
+        </p>
+
+        {/* Action */}
+        <button
+          className="mt-2 w-full py-3 rounded-xl
+          bg-blue-500 hover:bg-blue-600
+          text-white font-semibold
+          shadow-lg shadow-blue-500/40
+          transition-all duration-300 active:scale-95"
+        >
+          Start Conversation
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default Home;
+
+
+
+
+```
+
+
+### now setup google gemini 
+
+
+## setting up gemini api :
+
+- gemini.js
+
+```
+
+```
