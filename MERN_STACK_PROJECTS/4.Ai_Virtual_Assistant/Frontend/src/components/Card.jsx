@@ -24,7 +24,11 @@ const Card = ({ image }) => {
         hover:shadow-2xl hover:shadow-blue-600/40
         hover:border-blue-400 ${selectedImage == image ? "border-8 border-white-800" :null}`}
       
-      onClick={()=>setSelectedImage(image)}
+      onClick={()=>{
+        setSelectedImage(image)
+        setBackendImage(null)
+        setFrontendImage(null)
+      }}
     >
       <img
         src={image}

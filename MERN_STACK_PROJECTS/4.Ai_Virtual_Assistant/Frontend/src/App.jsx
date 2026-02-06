@@ -14,7 +14,7 @@ const App = () => {
     <div>
       <Routes>
         <Route path="/" element={(userData?.assistantImage && userData?.assistantName)? <Home /> : <Navigate to={"/customize"} />} />
-        <Route path="/signup" element={!userData? <SignUp />: <Navigate to={"/"} />} />
+        <Route path="/signup" element={!userData? <SignUp />: <Navigate to={"/customize"} />} />
         <Route path="/login" element={!userData? <Login /> : <Navigate to={"/"} />} />
         <Route path="/customize" element={userData?<Customized />:<Navigate to={"/login"} />} />
         <Route path='/customize2' element={userData?<Customized1 />:<Navigate to={"/login"} />} />

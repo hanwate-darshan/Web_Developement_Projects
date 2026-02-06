@@ -10,27 +10,30 @@ import image7 from "../assets/authBg.png";
 import { RiImageAiFill } from "react-icons/ri";
 import { userDataContext } from "../context/UserContext.jsx";
 import { useNavigate } from "react-router-dom";
+import { IoArrowBackCircle } from "react-icons/io5";
 
 const Customized = () => {
- 
+
   let inputImage = useRef()
-   const { serverUrl , userData , setUserData , frontendImage, setFrontendImage , BackendImage, setBackendImage , selectedImage ,setSelectedImage} = useContext(userDataContext)
+  const { serverUrl, userData, setUserData, frontendImage, setFrontendImage, BackendImage, setBackendImage, selectedImage, setSelectedImage } = useContext(userDataContext)
 
-   const navigate = useNavigate()
+  const navigate = useNavigate()
 
-  const handleImage = (e) =>{
-      const file = e.target.files[0]
-      setBackendImage(file)
-      setFrontendImage(URL.createObjectURL(file))
+  const handleImage = (e) => {
+    const file = e.target.files[0]
+    setBackendImage(file)
+    setFrontendImage(URL.createObjectURL(file))
   }
   return (
     <div
       className="w-full min-h-screen overflow-auto 
       flex flex-col items-center justify-start
       bg-linear-to-t from-black to-[#0a0a69]
-      px-4 py-10"
+      px-4 py-10 relative"
     >
+
       {/* Heading */}
+      <IoArrowBackCircle onClick={() => navigate("/")} className="absolute top-10 left-10 text-white  text-5xl  transition-all duration-300  hover:scale-95 cursor-pointer" />
       <h1
         className="text-2xl sm:text-3xl md:text-4xl 
         font-bold text-white text-center mb-10"
@@ -56,38 +59,38 @@ const Customized = () => {
         <Card image={image7} />
 
         {/* AI Custom Card */}
-   
+
 
 
 
         <div
-          className= {`w-35 h-55 sm:w-37.5 sm:h-60 
+          className={`w-35 h-55 sm:w-37.5 sm:h-60 
           bg-[#090945] border-2 border-blue-800 
           rounded-2xl overflow-hidden cursor-pointer
           transition-all duration-300 ease-in-out
           hover:scale-105 hover:shadow-2xl hover:shadow-blue-600/40
-          hover:border-blue-400 flex items-center justify-center ${selectedImage == "input" ? "border-8 border-white-800":null} `}
+          hover:border-blue-400 flex items-center justify-center ${selectedImage == "input" ? "border-8 border-white-800" : null} `}
 
-          onClick={()=>{
+          onClick={() => {
             inputImage.current.click()
             setSelectedImage("input")
           }}
-          >
+        >
           {!frontendImage && <RiImageAiFill className="text-5xl text-white" />}
-            {frontendImage && <img src={frontendImage} className="h-full object-cover" /> }
-          
+          {frontendImage && <img src={frontendImage} className="h-full object-cover" />}
+
         </div>
       </div>
 
 
-      <input type="file" accept="image/*" hidden ref={inputImage}   onChange={handleImage} />
+      <input type="file" accept="image/*" hidden ref={inputImage} onChange={handleImage} />
 
 
 
       {/* Button */}
 
-      {selectedImage && <button  
-      onClick={()=>navigate("/customize2")}
+      {selectedImage && <button
+        onClick={() => navigate("/customize2")}
         className="mt-12 px-10 py-3 rounded-full 
         bg-blue-500 hover:bg-blue-600 
         text-white font-semibold text-lg
@@ -96,7 +99,7 @@ const Customized = () => {
       >
         Next
       </button>}
-      
+
     </div>
   );
 };
