@@ -15,10 +15,10 @@ function App() {
     <>
      <Routes>
       <Route path="/" element={userData ? <Home />: <Navigate  to="/login"  />} />
-      {/* <Route path="/signup" element={userData? <Navigate to="/" />:<Signup />} />
-      <Route path="/login" element={userData?  <Navigate to="/" />:<Login />} /> */}
-      <Route path="/signup" element={<Signup/>} />
-      <Route path="/login" element={<Login/>} />
+      <Route path="/signup" element={userData? <Navigate to="/" />:<Signup />} />
+      <Route path="/login" element={userData?  <Navigate to="/" />:<Login />} />
+      {/* <Route path="/signup" element={<Signup/>} />
+      <Route path="/login" element={<Login/>} /> */}
     </Routes>
     </>
   )

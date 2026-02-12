@@ -622,3 +622,296 @@ const Login = () => {
 export default Login
 
 ```
+
+
+
+### now move to the backend and check that if particular user is authenticate or not.
+
+- middleware.js ---> isAuth.js
+
+```
+import jwt from "jsonwebtoken"
+
+const isAuth = async (req,res,next) => {
+    try {
+        let {token} = req.cookies
+        if (!token) {
+            return res.status(400).json({message:"user doesn't have token"})
+        }
+        let verifyToken = jwt.verify(token, process.env.JWT_SECRET)
+        if(!verifyToken){
+            return res.status(400).json({message:"user doesn't have valid token"})
+        }
+
+       
+
+        req.userId = verifyToken.userId;
+        next()
+    } catch (error) {
+        return res.status(500).json({message:`is auth error ${error}`})
+    }
+}
+
+export default isAuth;
+
+```
+
+- controllers ----> user.controllers.js
+
+```
+import User from "../models/user.model.js"
+
+export const getCurrentUser = async (req,res) => {
+    try {
+        let id = req.userId
+        // console.log(id);
+        const user = await User.findById(id).select("-password")
+        if (!user) {
+            return res.status(400).json({message:"user does not found !! "})
+        }
+        
+        return res.status(200).json(user)
+    } catch (error) {
+        return res.status(400).json({message:"get current user error !! "})
+        console.log(error)
+    }
+}
+
+```
+
+- create route for this 
+
+- routes ----> user.route.js
+
+```
+import express from "express"
+import { getCurrentUser } from "../controllers/user.controllers.js";
+import isAuth from "../middlewares/isAuth.js";
+
+let userRouter = express.Router();
+
+userRouter.get("/currentuser",isAuth,getCurrentUser)
+
+export default userRouter;
+```
+
+
+- index.js
+
+```
+import express from "express"
+import dotenv from "dotenv"
+import connectDB from "./config/db.js"
+import authRouter from "./routes/auth.routes.js"
+import cookieParser from "cookie-parser"
+import cors from "cors"
+import userRouter from "./routes/users.routes.js"
+
+dotenv.config()
+
+const app = express()
+const port = process.env.PORT 
+
+// MIDDLEWARES
+app.use(cors({origin:"http://localhost:5173",credentials:true}))
+app.use(express.json())
+app.use(cookieParser())
+
+// ROUTES
+app.use("/api/auth", authRouter)
+app.use("/api/user", userRouter)
+
+app.get("/", (req, res) => {
+  res.send("Hello World!")
+})
+
+// SERVER
+app.listen(port, () => {
+  connectDB()
+  console.log(`Server running on port ${port}`)
+})
+
+```
+
+
+### now getting current user in frontend
+
+- context ---> User.Context.jsx
+
+```
+
+import React, { createContext, useContext, useEffect, useState } from 'react'
+import { authDataContext } from './AuthContext.jsx'
+import axios from 'axios'
+export const userDataContext = createContext()
+const UserContext = ({children}) => {
+
+    const [userData, setuserData] = useState([])
+let {serverUrl} = useContext(authDataContext)
+
+    const getCurrentUser = async () =>{
+        try {
+            let result = await axios.get(serverUrl + "/api/user/currentuser",{
+                withCredentials:true
+            })
+            // console.log(result)
+            setuserData(result.data)
+        } catch (error) {
+            console.log(error)
+             setuserData(null)
+        }
+    }
+
+
+
+    useEffect(()=>{
+        getCurrentUser()
+    },[])
+
+    const value = {
+         userData, setuserData
+    }
+  return (
+    <div>
+        <userDataContext.Provider value={value}>
+
+       {children}
+        </userDataContext.Provider>
+    </div>
+  )
+}
+
+export default UserContext
+
+```
+
+
+- main.jsx
+
+```
+
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import './index.css'
+import App from './App.jsx'
+import { BrowserRouter } from 'react-router-dom'
+import AuthContext from './context/AuthContext.jsx'
+import UserContext from './context/UserContext.jsx'
+
+createRoot(document.getElementById('root')).render(
+  <StrictMode>
+    <BrowserRouter>
+    <AuthContext>
+     <UserContext>
+    <App />
+     </UserContext>
+    </AuthContext>
+    </BrowserRouter>
+  </StrictMode>
+)
+
+
+```
+
+### now protect the routes 
+
+- app.jsx
+
+```
+
+import { Navigate, Route, Router, Routes } from "react-router-dom"
+import Home from "./pages/Home.jsx"
+import Signup from "./pages/Signup.jsx"
+import Login from "./pages/Login.jsx"
+import { useContext } from "react"
+import { userDataContext } from "./context/UserContext.jsx"
+
+
+function App() {
+  
+  let {userData} = useContext(userDataContext)
+
+
+  return (
+    <>
+     <Routes>
+      <Route path="/" element={userData ? <Home />: <Navigate  to="/login"  />} />
+      <Route path="/signup" element={userData? <Navigate to="/" />:<Signup />} />
+      <Route path="/login" element={userData?  <Navigate to="/" />:<Login />} />
+      {/* <Route path="/signup" element={<Signup/>} />
+      <Route path="/login" element={<Login/>} /> */}
+    </Routes>
+    </>
+  )
+}
+
+export default App
+
+
+
+```
+
+### handling profile image
+
+- setup cloudinary ---> visit cloudinary website 
+
+
+
+
+- config ----> cloudinary.js
+
+```
+import { v2 as cloudinary } from 'cloudinary';
+import fs from "fs"
+
+
+const uploadOnCloudinary = async (filePath) => {
+     cloudinary.config({ 
+        cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
+        api_key: CLOUDINARY_API_KEY, 
+        api_secret: CLOUDINARY_API_SECRET
+    });
+    try {
+        if(!filePath){
+            return null
+        }
+
+        const uploadResult = await cloudinary.uploader.upload(filePath)
+        fs.unlinkSync(filePath)
+        return uploadResult.secure_url;
+        
+        
+        
+    } catch (error) {
+        fs.unlinkSync(filePath)
+        console.log(`cloudinary error ${error}`)
+    }
+}
+
+export default uploadOnCloudinary;
+
+
+```
+
+- multer image ko dega frontend se and diskstrogae mai dalega public folder mai
+
+- middleware ---> multer.js
+
+```
+import multer from "multer"
+
+const upload = multer({storage})
+
+let storage = multer.diskStorage({
+    destination:(req,file,cb)=>{
+        cb(null,"./public")
+    },
+    filename:(req,file,cb)=>{
+        cb(null,file.originalname)
+    }
+})
+
+export default upload;
+
+```
+

@@ -44,7 +44,8 @@ const userSchema = new mongoose.Schema({
         fieldOfStudy:{type:String}
     }],
     location:{
-        type:String
+        type:String,
+        default:"India"
     },
     gender:{
         type:String,

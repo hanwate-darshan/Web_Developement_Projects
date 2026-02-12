@@ -4,7 +4,7 @@ import axios from 'axios'
 export const userDataContext = createContext()
 const UserContext = ({children}) => {
 
-    const [userData, setuserData] = useState([])
+    const [userData, setUserData] = useState(null)
 let {serverUrl} = useContext(authDataContext)
 
     const getCurrentUser = async () =>{
@@ -13,10 +13,10 @@ let {serverUrl} = useContext(authDataContext)
                 withCredentials:true
             })
             // console.log(result)
-            setuserData(result.data)
+            setUserData(result.data)
         } catch (error) {
             console.log(error)
-             setuserData(null)
+             setUserData(null)
         }
     }
 
@@ -27,7 +27,7 @@ let {serverUrl} = useContext(authDataContext)
     },[])
 
     const value = {
-         userData, setuserData
+         userData, setUserData
     }
   return (
     <div>
