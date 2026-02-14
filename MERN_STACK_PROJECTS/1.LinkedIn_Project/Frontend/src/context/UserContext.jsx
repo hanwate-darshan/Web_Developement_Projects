@@ -6,6 +6,7 @@ const UserContext = ({children}) => {
 
     const [userData, setUserData] = useState(null)
 let {serverUrl} = useContext(authDataContext)
+let [edit,setEdit] = useState(false)
 
     const getCurrentUser = async () =>{
         try {
@@ -27,7 +28,7 @@ let {serverUrl} = useContext(authDataContext)
     },[])
 
     const value = {
-         userData, setUserData
+         userData, setUserData , edit ,setEdit
     }
   return (
     <div>

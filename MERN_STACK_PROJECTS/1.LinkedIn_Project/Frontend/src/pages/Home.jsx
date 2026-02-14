@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import React, { useContext, useState } from 'react'
 import Navbar from '../components/Navbar.jsx'
 import dp from "../assets/empty-dp.webp";
 import { FaCirclePlus } from "react-icons/fa6";
@@ -8,13 +8,14 @@ import { HiPencil } from "react-icons/hi2";
 import EditProfile from '../components/EditProfile.jsx';
 
 const Home = () => {
-  let {userData,setUserData} = useContext(userDataContext)
+  let {userData,setUserData , edit ,setEdit} = useContext(userDataContext)
+  
   return (
-    <div className='w-full min-h-screen bg-[#e8eee8] pt-30 flex items-start justify-center gap-5 px-5 flex-col lg:flex-row'>
+    <div className='w-full min-h-screen bg-[#8d9c8d] pt-30 flex items-start justify-center gap-5 px-5 flex-col lg:flex-row'>
 
 
-
-      <EditProfile />
+       {edit && <EditProfile  />}
+      
       <Navbar />
       
 
@@ -31,11 +32,10 @@ const Home = () => {
 
          <div
                    className="w-13 h-13  rounded-full overflow-hidden cursor-pointer border border-gray-300 flex items-center justify-center relative -top-9 left-7.5"
-                   onClick={() => setShowProfile(!showProfile)}
+                   onClick={() => {setShowProfile(!showProfile),setEdit(true)}}
                  >
-                   <img src={dp} alt="profile" className="w-full h-full object-cover" />
+                   <img src={dp} alt="profile" className="w-full h-full object-cover" onClick={()=>setEdit(true)} />
                    {/* plus icons */}
-                   
                       <FaCirclePlus className='w-3 h-3 absolute right-2 bottom-1 text-blue-500'/>
                    
                  </div>
@@ -55,6 +55,7 @@ const Home = () => {
                  </div>
                   <button
               className="w-full py-2 rounded-full border border-blue-400 text-blue-500 hover:bg-blue-50 transition flex items-center justify-center gap-3 cursor-pointer"
+              onClick={()=>setEdit(true)}
             >
               Edit Profile <HiPencil />
             </button>
