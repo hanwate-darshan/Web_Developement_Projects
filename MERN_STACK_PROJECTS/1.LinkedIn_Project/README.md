@@ -915,3 +915,91 @@ export default upload;
 
 ```
 
+
+### image handling in frontend
+
+- firstly create an input and give that input to reference for that useRef() function.
+#### this is a code for selecting input image
+```
+  const profileImage = useRef()
+  const coverImage = useRef()
+
+   {/* Profile image input */}
+        <input type="file" accept="image/*" hidden ref={profileImage}/>
+
+
+        {/* Cover Image Input  */}
+        <input type="file" accept="image/*" hidden ref={coverImage} />
+
+
+        <div onClick={()=>profileImage.current.click()> <div>
+        <div onClick={()=>coverImage.current.click()> <div>
+  ```
+
+
+- handling frontend and backend image 
+
+```
+
+// profile image
+  const[frontEndProfileImage,setFrontEndProfileImage] = useState(userData.profileImage || dp)
+  const[backEndProfileImage,setBackEndProfileImage] = useState(null)
+  // cover image
+  const[frontEndCoverImage,setFrontEndCoverImage] = useState(userData.coverImage || null)
+  const[backEndCoverImage,setBackEndCoverImage] = useState(null)
+
+
+   const handleProfileImage = async (e) => {
+    let file = e.target.files[0]
+    setBackEndProfileImage(file)
+
+    setFrontEndProfileImage(URL.createObjectURL(file))
+  }
+
+
+        {/* Profile image input */}
+        <input type="file" accept="image/*" hidden ref={profileImage} onChange={handleProfileImage}/>
+
+
+        {/* Cover Image Input  */}
+        <input type="file" accept="image/*" hidden ref={coverImage} onChange={handleCoverImage}/>
+
+  {/* Cover */}
+        <div className="relative w-full h-44 bg-linear-to-r from-blue-500 to-indigo-600 rounded-xl mt-10" onClick={()=>coverImage.current.click()}>
+          <img src={frontEndCoverImage} className="w-full" />
+          <CiCamera className="absolute top-3 right-3 text-white text-4xl p-1 rounded-full cursor-pointer" />
+        </div>
+
+        {/* Profile */}
+        <div className="w-18 h-18 rounded-full overflow-hidden border-4 border-white shadow-lg absolute top-45 left-14 cursor-pointer" onClick={()=>profileImage.current.click()}>
+          <img
+            src={frontEndProfileImage }
+            alt=""
+            className="w-full h-full object-cover"
+          />
+          <FaCirclePlus className="absolute right-1 bottom-1 text-blue-500 bg-white rounded-full" />
+        </div>
+
+
+```
+
+
+### after creating edit profile page -->
+
+### now update it in controller and routes
+
+- controller ----> usercontroller.js
+
+```
+
+
+```
+
+
+- routes ----> user.routes.js
+
+```
+
+
+```
+
