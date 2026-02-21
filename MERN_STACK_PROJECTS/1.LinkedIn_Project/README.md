@@ -1003,3 +1003,11 @@ export default upload;
 
 ```
 
+- EditProfile.jsx
+
+```
+
+
+```
+
+- array data ko string mai convert karna padata hai like skils , education , experience iss sabko string mai convert karna padata hai
