@@ -1,11 +1,4 @@
 
-
-
-
-
-
-
-
 import React, { useContext, useRef, useState } from "react";
 import { RxCross2 } from "react-icons/rx";
 import { userDataContext } from "../context/UserContext.jsx";
@@ -56,23 +49,6 @@ const EditProfile = () => {
 
     setFrontEndCoverImage(URL.createObjectURL(file))
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -148,10 +124,12 @@ const EditProfile = () => {
 
 
 
+  let [saving,setSaving] = useState(false)
 
   // save profile function
 
   const handleSaveProfile = async () => {
+    setSaving(true)
     try {
       let formData = new FormData()
       formData.append("firstName", firstName)
@@ -176,16 +154,23 @@ const EditProfile = () => {
         formData
       },{withCredentials:true})
 
-      console.log(result)
+
+      setUserData(result.data)
+      
+
+      setEdit(false)
+      setSaving(false)
 
 
     } catch (error) {
           console.log(error)
+          setSaving(false)
     }
   }
 
 
 
+  
 
 
 
@@ -430,8 +415,10 @@ const EditProfile = () => {
 
         {/* Save */}
         <button className="w-full mt-8 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 cursor-pointer mb-7"
-        onClick={()=>handleSaveProfile()}>
-          Save Profile
+       disabled={saving}
+       
+       onClick={()=>handleSaveProfile()}>
+          {saving ? "saving...":"Save Profile"}
         </button>
       </div>
     </div>

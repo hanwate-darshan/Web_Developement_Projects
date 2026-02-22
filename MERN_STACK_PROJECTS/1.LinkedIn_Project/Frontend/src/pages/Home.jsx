@@ -9,6 +9,7 @@ import EditProfile from '../components/EditProfile.jsx';
 
 const Home = () => {
   let {userData,setUserData , edit ,setEdit} = useContext(userDataContext)
+ 
   
   return (
     <div className='w-full min-h-screen bg-[#8d9c8d] pt-30 flex items-start justify-center gap-5 px-5 flex-col lg:flex-row'>
@@ -22,9 +23,9 @@ const Home = () => {
        {/* left */}
       <div className=' w-full lg:w-[25%] min-h-50 bg-white shadow-lg rounded-lg p-2'>
          
-         {/* cover image */}
+         {/* cover image s */}
         <div className='w-full h-23 bg-gray-300 rounded-lg flex justify-center items-center overflow-hidden relative'>
-          <img src="" alt="" className='w-full' />
+          <img src={userData.coverImage || null} alt="" className='w-full' />
           <CiCamera className='w-6 h-6 absolute top-3 right-3 cursor-pointer' />
         </div>
 
@@ -34,7 +35,7 @@ const Home = () => {
                    className="w-13 h-13  rounded-full overflow-hidden cursor-pointer border border-gray-300 flex items-center justify-center relative -top-9 left-7.5"
                    onClick={() => {setShowProfile(!showProfile),setEdit(true)}}
                  >
-                   <img src={dp} alt="profile" className="w-full h-full object-cover" onClick={()=>setEdit(true)} />
+                   <img src={userData.profileImage || dp} alt="profile" className="w-full h-full object-cover" onClick={()=>setEdit(true)} />
                    {/* plus icons */}
                       <FaCirclePlus className='w-3 h-3 absolute right-2 bottom-1 text-blue-500'/>
                    

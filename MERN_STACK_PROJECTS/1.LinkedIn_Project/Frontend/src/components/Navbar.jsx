@@ -90,7 +90,7 @@ const Navbar = () => {
           className="w-8 h-8 sm:w-9 sm:h-9 rounded-full overflow-hidden cursor-pointer border border-gray-300"
           onClick={() => setShowProfile(!showProfile)}
         >
-          <img src={dp} alt="profile" className="w-full h-full object-cover" />
+          <img src={userData.profileImage || dp} alt="profile" className="w-full h-full object-cover" />
         </div>
 
         {/* PROFILE DROPDOWN */}
@@ -103,7 +103,7 @@ const Navbar = () => {
           >
             <div className="w-14 h-14 rounded-full overflow-hidden border">
               <img
-                src={userData?.assistantImage || dp}
+                src={userData.profileImage || dp}
                 alt=""
                 className="w-full h-full object-cover"
               />
