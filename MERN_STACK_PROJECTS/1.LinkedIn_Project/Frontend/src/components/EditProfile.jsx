@@ -181,7 +181,7 @@ const EditProfile = () => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4 ">
       {/* Overlay */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm "></div>
+      <div className="absolute  inset-0 bg-black/60 backdrop-blur-sm "></div>
 
       {/* Modal */}
       <div className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-white rounded-2xl shadow-2xl p-6 mt-30 ">
