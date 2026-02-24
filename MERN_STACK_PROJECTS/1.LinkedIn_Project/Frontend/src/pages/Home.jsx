@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useRef, useState } from 'react'
 import Navbar from '../components/Navbar.jsx'
 import dp from "../assets/empty-dp.webp";
 import { FaCirclePlus } from "react-icons/fa6";
@@ -7,11 +7,26 @@ import { userDataContext } from '../context/UserContext.jsx';
 import { HiPencil } from "react-icons/hi2";
 import EditProfile from '../components/EditProfile.jsx';
 import { RxCross2 } from "react-icons/rx";
+import { FaImage } from "react-icons/fa";
 
 const Home = () => {
   let {userData,setUserData , edit ,setEdit} = useContext(userDataContext)
   const [showProfile, setShowProfile] = useState(false)
- 
+
+  let [frontendImage,setfrontendImage] = useState("")
+  let [backendImage,setBackendImage] = useState("")
+  let [description,setdescription ] = useState("")
+  let image = useRef()
+
+  let [uploadPost,setUploadPost] = useState(false)
+
+
+  function handleImage (e){
+     let file = e.target.files[0];
+     setBackendImage(file)
+
+     setfrontendImage(URL.createObjectURL(file))
+  }
   
   return (
     <div className='w-full min-h-screen bg-[#8d9c8d] pt-30 flex items-start justify-center gap-5 px-5 flex-col lg:flex-row relative'>
@@ -46,6 +61,12 @@ const Home = () => {
            
 
 
+
+
+
+
+
+
                   {/* User Details */}
                  <div>
 
@@ -67,55 +88,85 @@ const Home = () => {
       </div>
 
 
+{/* Post form */}
 
-  
-    {/* Post form  */}
-     
-     <div className='w-full h-full bg-black absolute top-0 left-0 z-100 opacity-[0.3]'>
-     </div>
-          <div className='w-[90%] max-w-120 h-120 bg-white shadow-lg rounded-lg absolute z-200 p-5 flex items-start justify-start flex-col gap-4'>
-                {/* cross  */}
-                <div
-                          className="absolute right-4 top-4"
-                          
-                        >
-                          <RxCross2 className="text-2xl cursor-pointer hover:scale-110 transition" />
-                        </div>
+{/* Overlay */}
+<div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"></div>
 
+{/* Modal */}
+<div className="fixed w-[95%] sm:w-[90%] max-w-2xl bg-white shadow-2xl rounded-xl z-50 
+p-6 flex flex-col gap-5 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
 
+  {/* Cross */}
+  <div className="absolute right-4 top-4">
+    <RxCross2 className="text-2xl cursor-pointer hover:scale-110 transition" />
+  </div>
 
+  {/* Header */}
+  <div className="flex items-center gap-3 border-b pb-4">
 
-                       
-      <div className='flex justify-start items-center gap-3'>
-                        {/* profile image  */}
+    {/* Profile image */}
 
     <div className="w-12 h-12 rounded-full overflow-hidden border border-gray-300">
       <img
         src={userData?.profileImage || dp}
         alt="profile"
         className="w-full h-full object-cover"
-        />
+      />
     </div>
 
+    {/* Name */}
+    <div className="text-lg font-semibold text-gray-800">
+      {`${userData?.firstName} ${userData?.lastName}`}
+    </div>
+  </div>
 
-      {/* Profile Name Div  */}
+  {/* Textarea */}
+  <textarea
+    className={`w-full ${frontendImage? "min-h-20.5":"min-h-37.5"} outline-none border-none resize-none 
+    text-base text-gray-700 placeholder-gray-400 `}
+    placeholder="What do you want to talk about?"
+    value={description}
+    onChange={(e)=>setdescription(e.target.value)}
+  ></textarea>
 
-      <div className=' text-xl text-gray-600'>
-         {`${userData.firstName} ${userData.lastName}`}
+  <div className=''>
+    <img className='w-full h-70 overflow-hidden' src={frontendImage || null}  />
+  </div>
+
+  {/* Bottom section */}
+  <div className="w-full flex flex-col gap-4">
+
+    {/* Media */}
+     <input type="file" ref={image} hidden onChange={handleImage}/>
+    <div className="flex items-center gap-4 border-t pt-4">
+      <div className="flex items-center gap-2 cursor-pointer 
+      text-gray-600 hover:text-blue-600 transition"
+      onClick={()=>image.current.click()}>
+        <FaImage className="text-xl" />
+        <span className="text-sm">Photo</span>
       </div>
+    </div>
 
-        </div>
+    {/* Post button */}
+    <div className="flex justify-end">
+      <button
+        className="px-6 py-2 rounded-full bg-blue-600 hover:bg-blue-700 
+        text-white font-medium transition cursor-pointer"
+      >
+        Post
+      </button>
+    </div>
+  </div>
+</div>
 
 
 
-        <textarea className='w-full h-110 outline-none border-none p-4 resize-none text-sm text-gray-400' placeholder='What do you want to talk about..?'></textarea>
 
 
-       
-           
 
 
-          </div>
+
 
 
 
